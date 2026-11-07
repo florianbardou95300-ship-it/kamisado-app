@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff7a4a"/>
+      <stop offset="45%" stop-color="#e8452a"/>
+      <stop offset="100%" stop-color="#a81f18"/>
+    </linearGradient>
+    <linearGradient id="woodDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a1a18"/>
+      <stop offset="100%" stop-color="#20100f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Piliers (pleine hauteur, passent derrière les traverses) -->
+  <rect x="328" y="300" width="66" height="500" rx="6" fill="url(#wood)"/>
+  <rect x="630" y="300" width="66" height="500" rx="6" fill="url(#wood)"/>
+
+  <!-- Socles -->
+  <rect x="312" y="788" width="98" height="34" rx="6" fill="url(#woodDark)"/>
+  <rect x="614" y="788" width="98" height="34" rx="6" fill="url(#woodDark)"/>
+
+  <!-- Nuki : traverse basse, droite -->
+  <rect x="280" y="460" width="464" height="48" rx="8" fill="url(#wood)"/>
+
+  <!-- Gakuzuka : montant central -->
+  <rect x="497" y="364" width="30" height="100" fill="url(#wood)"/>
+
+  <!-- Kasagi : traverse haute -->
+  <rect x="230" y="306" width="564" height="58" rx="10" fill="url(#wood)"/>
+
+  <!-- Chapeau du kasagi, extrémités relevées -->
+  <path d="M212,322
+           C212,300 234,288 262,288
+           L762,288
+           C790,288 812,300 812,322
+           L812,344
+           C812,328 790,320 762,320
+           L262,320
+           C234,320 212,328 212,344
+           Z" fill="url(#woodDark)"/>
+</svg>
