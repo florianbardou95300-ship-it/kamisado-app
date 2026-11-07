@@ -1,0 +1,16 @@
+{
+  "name": "kamisado-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kamisado — jeu de plateau, local et en ligne (2 joueurs), app Android via Capacitor",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

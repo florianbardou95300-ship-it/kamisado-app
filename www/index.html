@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Kamisado</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="screen-menu" class="screen active">
+  <div class="menu-card">
+    <h1 class="title">Kamisado</h1>
+    <p class="subtitle">Le jeu des tours de couleur</p>
+
+    <button class="btn btn-primary" id="btn-local">Jouer en local<br><span class="btn-sub">2 joueurs, même téléphone</span></button>
+    <button class="btn btn-primary" id="btn-online">Jouer en ligne<br><span class="btn-sub">2 joueurs, 2 téléphones</span></button>
+    <button class="btn btn-ghost" id="btn-rules">Règles du jeu</button>
+  </div>
+</div>
+
+<div id="screen-online-setup" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-menu">‹ Retour</button>
+    <h2 class="title-sm">Partie en ligne</h2>
+
+    <div id="online-choice">
+      <button class="btn btn-primary" id="btn-host">Créer une partie</button>
+      <button class="btn btn-primary" id="btn-join">Rejoindre une partie</button>
+    </div>
+
+    <div id="host-panel" class="hidden panel">
+      <p class="step-label">1. Envoie ce code à ton adversaire</p>
+      <textarea id="host-offer-code" class="code-box" readonly placeholder="Génération du code…"></textarea>
+      <button class="btn btn-secondary" id="btn-share-offer">Partager / Copier le code</button>
+
+      <p class="step-label">2. Colle ici le code de réponse qu'il t'envoie</p>
+      <textarea id="host-answer-input" class="code-box" placeholder="Colle le code de réponse ici…"></textarea>
+      <button class="btn btn-primary" id="btn-connect-host">Se connecter</button>
+      <p id="host-status" class="status-text"></p>
+    </div>
+
+    <div id="join-panel" class="hidden panel">
+      <p class="step-label">1. Colle ici le code reçu de l'hôte</p>
+      <textarea id="join-offer-input" class="code-box" placeholder="Colle le code de l'hôte ici…"></textarea>
+      <button class="btn btn-primary" id="btn-generate-answer">Générer ma réponse</button>
+
+      <p class="step-label">2. Envoie ce code de réponse à l'hôte</p>
+      <textarea id="join-answer-code" class="code-box" readonly placeholder="…"></textarea>
+      <button class="btn btn-secondary hidden" id="btn-share-answer">Partager / Copier le code</button>
+      <p id="join-status" class="status-text"></p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="game-wrap">
+    <div class="hud">
+      <button class="icon-btn" id="btn-quit">‹</button>
+      <div class="hud-center">
+        <div id="hud-turn" class="hud-turn">—</div>
+        <div id="hud-required" class="hud-required"></div>
+      </div>
+      <div class="hud-right" id="hud-conn"></div>
+    </div>
+
+    <div id="board" class="board"></div>
+
+    <div id="banner" class="banner hidden">
+      <div id="banner-text"></div>
+      <button class="btn btn-primary" id="btn-rematch">Rejouer</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-rules" class="screen">
+  <div class="menu-card rules-card">
+    <button class="back-btn" data-back="screen-menu">‹ Retour</button>
+    <h2 class="title-sm">Règles</h2>
+    <div class="rules-text">
+      <p><strong>But :</strong> amener une de vos tours sur la rangée de départ de l'adversaire.</p>
+      <p><strong>Déplacement :</strong> chaque tour avance tout droit ou en diagonale, vers l'avant uniquement, d'autant de cases que l'on veut, sans sauter par-dessus une autre tour. On peut capturer une tour adverse en se posant dessus.</p>
+      <p><strong>La règle clé :</strong> après chaque coup, l'adversaire doit obligatoirement jouer la tour dont la couleur correspond à la case sur laquelle vous venez de poser la vôtre.</p>
+      <p><strong>Blocage :</strong> si cette tour ne peut faire aucun mouvement, son propriétaire perd immédiatement la partie — il n'y a pas de passe en Kamisado.</p>
+      <p><strong>Premier coup :</strong> le premier joueur peut déplacer la tour de son choix.</p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
