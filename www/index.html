@@ -15,6 +15,7 @@
 
     <button class="btn btn-primary" id="btn-local">Jouer en local<br><span class="btn-sub">2 joueurs, même téléphone</span></button>
     <button class="btn btn-primary" id="btn-online">Jouer en ligne<br><span class="btn-sub">2 joueurs, 2 téléphones</span></button>
+    <button class="btn btn-primary" id="btn-ai">Jouer contre l'IA<br><span class="btn-sub">Solo, adversaire programmé</span></button>
     <button class="btn btn-ghost" id="btn-rules">Règles du jeu</button>
   </div>
 </div>
@@ -53,6 +54,17 @@
   </div>
 </div>
 
+<div id="screen-ai-setup" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-menu">‹ Retour</button>
+    <h2 class="title-sm">Contre l'IA</h2>
+    <p class="subtitle">Choisis la difficulté</p>
+    <button class="btn btn-primary" id="btn-ai-facile">Facile<br><span class="btn-sub">Pour découvrir le jeu</span></button>
+    <button class="btn btn-primary" id="btn-ai-moyen">Moyen<br><span class="btn-sub">Réfléchit quelques coups à l'avance</span></button>
+    <button class="btn btn-primary" id="btn-ai-difficile">Difficile<br><span class="btn-sub">Calcule en profondeur, sans pitié</span></button>
+  </div>
+</div>
+
 <div id="screen-game" class="screen">
   <div class="game-wrap">
     <div class="hud">
@@ -79,7 +91,7 @@
     <h2 class="title-sm">Règles</h2>
     <div class="rules-text">
       <p><strong>But :</strong> amener une de vos tours sur la rangée de départ de l'adversaire.</p>
-      <p><strong>Déplacement :</strong> chaque tour avance tout droit ou en diagonale, vers l'avant uniquement, d'autant de cases que l'on veut, sans sauter par-dessus une autre tour. On peut capturer une tour adverse en se posant dessus.</p>
+      <p><strong>Déplacement :</strong> chaque tour avance tout droit ou en diagonale, vers l'avant uniquement, d'autant de cases que l'on veut. Il n'y a aucune capture : impossible de sauter par-dessus une tour ou de se poser sur une case occupée, même par sa propre tour. Les tours servent uniquement à bloquer le passage.</p>
       <p><strong>La règle clé :</strong> après chaque coup, l'adversaire doit obligatoirement jouer la tour dont la couleur correspond à la case sur laquelle vous venez de poser la vôtre.</p>
       <p><strong>Blocage :</strong> si cette tour ne peut faire aucun mouvement, son propriétaire perd immédiatement la partie — il n'y a pas de passe en Kamisado.</p>
       <p><strong>Premier coup :</strong> le premier joueur peut déplacer la tour de son choix.</p>

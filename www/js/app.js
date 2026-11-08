@@ -3,6 +3,7 @@ import {
   createInitialState, squareColor, movableTowers, applyMove,
 } from './kamisado.js';
 import { P2PConnection } from './webrtc.js';
+import { chooseAiMove } from './ai.js';
 
 const COLOR_LABEL = {
   orange: 'Orange', blue: 'Bleu', purple: 'Violet', pink: 'Rose',
@@ -23,8 +24,11 @@ document.querySelectorAll('[data-back]').forEach((btn) => {
 
 // ---------- État de partie ----------
 let state = null;
-let mode = 'local'; // 'local' | 'online'
+let mode = 'local'; // 'local' | 'online' | 'ai'
 let myOwner = BOTTOM; // en ligne : le rôle du joueur local
+let humanOwner = BOTTOM; // mode IA : le camp tenu par l'humain (l'IA joue l'autre)
+let aiDifficulty = 'moyen'; // 'facile' | 'moyen' | 'difficile'
+let aiThinking = false;
 let selected = null; // [r,c] sélectionné
 let net = null; // P2PConnection en mode en ligne
 
@@ -39,10 +43,12 @@ function startGame(newMode) {
   mode = newMode;
   state = createInitialState();
   selected = null;
+  aiThinking = false;
   banner.classList.add('hidden');
-  hudConn.textContent = mode === 'online' ? '🌐' : '';
+  hudConn.textContent = mode === 'online' ? '🌐' : mode === 'ai' ? '🤖' : '';
   showScreen('screen-game');
   render();
+  maybeScheduleAiMove();
 }
 
 function cellKey(r, c) { return `${r},${c}`; }
@@ -50,7 +56,11 @@ function cellKey(r, c) { return `${r},${c}`; }
 function render() {
   boardEl.innerHTML = '';
   const movable = state.winner ? [] : movableTowers(state);
-  const canActNow = mode === 'local' || state.turn === myOwner;
+  const canActNow = !aiThinking && (
+    mode === 'local'
+    || (mode === 'online' && state.turn === myOwner)
+    || (mode === 'ai' && state.turn === humanOwner)
+  );
   const movableMap = {};
   movable.forEach((m) => { movableMap[cellKey(m.row, m.col)] = m; });
 
@@ -74,10 +84,7 @@ function render() {
       }
 
       const isHighlighted = highlightMoves.some(([hr, hc]) => hr === r && hc === c);
-      if (isHighlighted) {
-        const occupied = state.towers[cellKey(r, c)];
-        cell.classList.add(occupied ? 'highlight-capture' : 'highlight');
-      }
+      if (isHighlighted) cell.classList.add('highlight');
 
       const tower = state.towers[cellKey(r, c)];
       if (tower) {
@@ -101,10 +108,16 @@ function render() {
       : `${state.winner === TOP ? 'Haut' : 'Bas'} gagne !`;
     hudRequired.textContent = state.loseReason === 'blocked' ? 'Tour bloquée' : 'Ligne adverse atteinte';
     showBanner(state);
+  } else if (aiThinking) {
+    hudTurn.textContent = "L'IA réfléchit…";
+    hudRequired.textContent = state.requiredColor
+      ? `Tour imposée : ${COLOR_LABEL[state.requiredColor]}`
+      : '';
   } else {
-    const turnLabel = mode === 'online'
-      ? (state.turn === myOwner ? 'À toi de jouer' : "À l'adversaire")
-      : `Tour : ${state.turn === TOP ? 'Haut' : 'Bas'}`;
+    let turnLabel;
+    if (mode === 'online') turnLabel = state.turn === myOwner ? 'À toi de jouer' : "À l'adversaire";
+    else if (mode === 'ai') turnLabel = state.turn === humanOwner ? 'À toi de jouer' : "Tour de l'IA";
+    else turnLabel = `Tour : ${state.turn === TOP ? 'Haut' : 'Bas'}`;
     hudTurn.textContent = turnLabel;
     hudRequired.textContent = state.requiredColor
       ? `Tour imposée : ${COLOR_LABEL[state.requiredColor]}`
@@ -122,10 +135,12 @@ function showBanner(finalState) {
 }
 
 function onCellClick(r, c, movableMap) {
-  if (state.winner) return;
+  if (state.winner || aiThinking) return;
 
   // Mode en ligne : on ne peut agir que si c'est bien notre tour.
   if (mode === 'online' && state.turn !== myOwner) return;
+  // Mode IA : on ne peut jouer que les tours de son propre camp.
+  if (mode === 'ai' && state.turn !== humanOwner) return;
 
   const clickedMovable = movableMap[cellKey(r, c)];
 
@@ -155,16 +170,37 @@ function performMove(fromR, fromC, toR, toC, fromRemote) {
   if (mode === 'online' && !fromRemote) {
     net && net.send({ type: 'move', from: [fromR, fromC], to: [toR, toC] });
   }
+  maybeScheduleAiMove();
+}
+
+/** En mode IA, si c'est au tour de la machine, calcule et joue son coup. */
+function maybeScheduleAiMove() {
+  if (mode !== 'ai' || state.winner || state.turn === humanOwner) return;
+  aiThinking = true;
+  render();
+  // setTimeout laisse le temps à l'UI de peindre "L'IA réfléchit…" avant le calcul
+  // (synchrone) de la machine, et donne un petit temps de pause plus naturel.
+  setTimeout(() => {
+    const move = chooseAiMove(state, aiDifficulty);
+    aiThinking = false;
+    if (move) {
+      performMove(move.from[0], move.from[1], move.to[0], move.to[1]);
+    } else {
+      render();
+    }
+  }, 300);
 }
 
 document.getElementById('btn-rematch').addEventListener('click', () => {
   state = createInitialState();
   selected = null;
+  aiThinking = false;
   banner.classList.add('hidden');
   render();
   if (mode === 'online') {
     net && net.send({ type: 'rematch' });
   }
+  maybeScheduleAiMove();
 });
 
 document.getElementById('btn-quit').addEventListener('click', () => {
@@ -181,6 +217,17 @@ document.getElementById('btn-online').addEventListener('click', () => {
   document.getElementById('host-panel').classList.add('hidden');
   document.getElementById('join-panel').classList.add('hidden');
 });
+document.getElementById('btn-ai').addEventListener('click', () => showScreen('screen-ai-setup'));
+
+// ---------- Mode IA ----------
+function startAiGame(difficulty) {
+  aiDifficulty = difficulty;
+  humanOwner = BOTTOM; // l'humain joue toujours en bas, et commence
+  startGame('ai');
+}
+document.getElementById('btn-ai-facile').addEventListener('click', () => startAiGame('facile'));
+document.getElementById('btn-ai-moyen').addEventListener('click', () => startAiGame('moyen'));
+document.getElementById('btn-ai-difficile').addEventListener('click', () => startAiGame('difficile'));
 
 // ---------- Mode en ligne : hôte ----------
 const hostOfferCode = document.getElementById('host-offer-code');

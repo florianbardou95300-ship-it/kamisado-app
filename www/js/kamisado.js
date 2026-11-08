@@ -8,10 +8,11 @@
  *
  * Règles :
  * - Une tour se déplace en ligne droite vers l'avant, ou en diagonale
- *   vers l'avant-gauche / avant-droite, d'autant de cases que l'on veut,
- *   sans sauter par-dessus une autre tour.
- * - On peut capturer une tour adverse en se posant sur sa case (pas de
- *   prise par saut).
+ *   vers l'avant-gauche / avant-droite, d'autant de cases que l'on veut.
+ * - Il n'y a aucune capture dans ce jeu : une tour ne peut ni sauter
+ *   par-dessus une autre tour, ni se poser sur une case occupée — que
+ *   ce soit une tour alliée ou adverse. Les tours servent uniquement
+ *   à bloquer le passage, les 16 tours restent en jeu toute la partie.
  * - Après un coup, l'adversaire doit obligatoirement jouer la tour dont
  *   la couleur correspond à la case sur laquelle on vient de se poser.
  * - Si cette tour ne peut faire aucun mouvement légal, le joueur qui doit
@@ -104,12 +105,7 @@ export function legalMovesFrom(state, r, c) {
     let nc = c + dc;
     while (inBounds(nr, nc)) {
       const occupant = state.towers[key(nr, nc)];
-      if (occupant) {
-        if (occupant.owner !== tower.owner) {
-          moves.push([nr, nc]); // capture
-        }
-        break; // bloqué dans cette direction, qu'il y ait capture ou non
-      }
+      if (occupant) break; // bloqué : aucune capture possible, qu'il soit allié ou adverse
       moves.push([nr, nc]);
       nr += dr;
       nc += dc;
@@ -167,8 +163,7 @@ export function applyMove(state, fromR, fromC, toR, toC) {
   const towers = { ...state.towers };
   const tower = towers[key(fromR, fromC)];
   delete towers[key(fromR, fromC)];
-  delete towers[key(toR, toC)]; // capture éventuelle
-  towers[key(toR, toC)] = tower;
+  towers[key(toR, toC)] = tower; // la case d'arrivée est toujours vide (pas de capture)
 
   const opponent = tower.owner === TOP ? BOTTOM : TOP;
   const homeRowForOpponentWin = tower.owner === TOP ? 7 : 0;
