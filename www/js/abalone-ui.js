@@ -31,7 +31,50 @@ const MIN_DRAG = UNIT * 0.58; // distance avant de considérer que le doigt quit
 const MAX_PREVIEW_OFFSET = UNIT * 0.62; // décalage visuel max pendant le glissement
 const AIM_COS_TOLERANCE = Math.cos(40 * Math.PI / 180);
 
-const PLAYER_LABEL = { [BLACK]: 'Noir', [WHITE]: 'Blanc' };
+// Chaque palette donne les 4 arrêts (effet verre/céramique) des deux
+// camps — "black" = camp qui commence (BLACK), "white" = l'autre (WHITE).
+// La forme du dégradé (reflet clair -> teinte -> ombre -> bord sombre)
+// est la même pour toutes les palettes, seules les couleurs changent.
+const MARBLE_PALETTES = {
+  'black-white': {
+    label: 'Noir / Blanc',
+    names: ['Noir', 'Blanc'],
+    swatch: ['#2c2c35', '#dcccab'],
+    black: [['0%', '#75757f'], ['28%', '#2c2c35'], ['70%', '#0c0c11'], ['100%', '#000000']],
+    white: [['0%', '#ffffff'], ['35%', '#f6ecdb'], ['75%', '#dcccab'], ['100%', '#b8a98a']],
+  },
+  'red-blue': {
+    label: 'Rouge / Bleu',
+    names: ['Rouge', 'Bleu'],
+    swatch: ['#e23b3b', '#3b6fe2'],
+    black: [['0%', '#ffd9d9'], ['30%', '#e23b3b'], ['75%', '#7a1414'], ['100%', '#1f0606']],
+    white: [['0%', '#d9e6ff'], ['30%', '#3b6fe2'], ['75%', '#14307a'], ['100%', '#06102b']],
+  },
+  'green-yellow': {
+    label: 'Vert / Jaune',
+    names: ['Vert', 'Jaune'],
+    swatch: ['#35b24a', '#e8c93a'],
+    black: [['0%', '#ddffe0'], ['30%', '#35b24a'], ['75%', '#0f5c1d'], ['100%', '#042209']],
+    white: [['0%', '#fff8d9'], ['30%', '#e8c93a'], ['75%', '#8a6f12'], ['100%', '#2e2403']],
+  },
+  'purple-orange': {
+    label: 'Violet / Orange',
+    names: ['Violet', 'Orange'],
+    swatch: ['#8a3ae8', '#e8833a'],
+    black: [['0%', '#ecd9ff'], ['30%', '#8a3ae8'], ['75%', '#481280'], ['100%', '#19052b']],
+    white: [['0%', '#ffe8d9'], ['30%', '#e8833a'], ['75%', '#8a4414'], ['100%', '#2e1505']],
+  },
+};
+const PALETTE_PREF_KEY = 'samourai_abalone_palette';
+function loadPalettePref() {
+  try {
+    const v = localStorage.getItem(PALETTE_PREF_KEY);
+    return v && MARBLE_PALETTES[v] ? v : 'black-white';
+  } catch (e) { return 'black-white'; }
+}
+function savePalettePref(id) {
+  try { localStorage.setItem(PALETTE_PREF_KEY, id); } catch (e) { /* ignore */ }
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
@@ -125,6 +168,19 @@ export function initAbalone() {
   let aimedMove = null;
   let capsuleEl = null;
 
+  let palette = loadPalettePref();
+  function currentPalette() { return MARBLE_PALETTES[palette] || MARBLE_PALETTES['black-white']; }
+  function playerLabel(owner) {
+    const names = currentPalette().names;
+    return owner === BLACK ? names[0] : names[1];
+  }
+  function updateTrayLabels() {
+    const names = currentPalette().names;
+    const lblBlack = document.getElementById('abalone-tray-label-black');
+    const lblWhite = document.getElementById('abalone-tray-label-white');
+    if (lblBlack) lblBlack.textContent = `${names[0]} sorties`;
+    if (lblWhite) lblWhite.textContent = `${names[1]} sorties`;
+  }
   let mode = 'local'; // 'local' | 'ai' | 'online'
   let humanOwner = BLACK; // mode IA : camp tenu par l'humain (l'IA joue l'autre)
   let myOwner = BLACK; // mode en ligne : rôle du joueur local
@@ -138,12 +194,28 @@ export function initAbalone() {
   function sameCell(a, b) { return a.q === b.q && a.r === b.r; }
   function containsCell(arr, c) { return arr.some((x) => sameCell(x, c)); }
 
+  /**
+   * Le joueur humain voit toujours ses propres billes en bas de l'écran :
+   * sans retournement, le blanc est en bas (r positif) et le noir en haut.
+   * Si l'humain joue noir, on retourne l'affichage du plateau à 180°
+   * (un simple `transform="rotate(180)"` sur le groupe qui porte toutes
+   * les cases — la logique du jeu et les coordonnées q,r restent inchangées).
+   */
+  function isFlipped() {
+    if (mode === 'online') return myOwner === BLACK;
+    if (mode === 'ai') return humanOwner === BLACK;
+    return false;
+  }
+
   function toSvgPoint(evt) {
     const pt = svg.createSVGPoint();
     pt.x = evt.clientX; pt.y = evt.clientY;
     const m = svg.getScreenCTM().inverse();
     const p = pt.matrixTransform(m);
-    return { x: p.x, y: p.y };
+    // Le CTM ci-dessus mesure dans le repère racine du <svg> (non affecté par
+    // la rotation du groupe interne) : on compense donc nous-mêmes le
+    // retournement pour retomber dans le même repère que hexToPixel/pixelOf.
+    return isFlipped() ? { x: -p.x, y: -p.y } : { x: p.x, y: p.y };
   }
 
   function nearestCell(p) {
@@ -170,8 +242,9 @@ export function initAbalone() {
       }
       defs.appendChild(g);
     };
-    grad('marbleBlack', [['0%', '#75757f'], ['28%', '#2c2c35'], ['70%', '#0c0c11'], ['100%', '#000000']]);
-    grad('marbleWhite', [['0%', '#ffffff'], ['35%', '#f6ecdb'], ['75%', '#dcccab'], ['100%', '#b8a98a']]);
+    const pal = MARBLE_PALETTES[palette] || MARBLE_PALETTES['black-white'];
+    grad('marbleBlack', pal.black);
+    grad('marbleWhite', pal.white);
     svg.appendChild(defs);
   }
 
@@ -179,6 +252,10 @@ export function initAbalone() {
     svg.innerHTML = '';
     buildDefs();
     const svgns = 'http://www.w3.org/2000/svg';
+    const boardGroup = document.createElementNS(svgns, 'g');
+    boardGroup.setAttribute('id', 'abalone-board-group');
+    if (isFlipped()) boardGroup.setAttribute('transform', 'rotate(180)');
+    svg.appendChild(boardGroup);
     for (const c of cells) {
       const p = pixelOf(c);
       const g = document.createElementNS(svgns, 'g');
@@ -202,18 +279,20 @@ export function initAbalone() {
       glint.setAttribute('cy', -RADIUS_CELL * 0.38);
       glint.setAttribute('rx', RADIUS_CELL * 0.26);
       glint.setAttribute('ry', RADIUS_CELL * 0.16);
-      glint.setAttribute('transform', 'rotate(-35)');
+      // Compense la rotation du groupe parent pour que le reflet de lumière
+      // garde toujours la même orientation à l'écran, plateau retourné ou non.
+      glint.setAttribute('transform', isFlipped() ? 'rotate(145)' : 'rotate(-35)');
       glint.setAttribute('visibility', 'hidden');
       g.appendChild(glint);
 
-      svg.appendChild(g);
+      boardGroup.appendChild(g);
     }
 
     capsuleEl = document.createElementNS(svgns, 'line');
     capsuleEl.setAttribute('class', 'abalone-selection');
     capsuleEl.setAttribute('stroke-linecap', 'round');
     capsuleEl.setAttribute('visibility', 'hidden');
-    svg.appendChild(capsuleEl);
+    boardGroup.appendChild(capsuleEl);
 
     svg.addEventListener('pointerdown', onPointerDown);
     svg.addEventListener('pointermove', onPointerMove);
@@ -245,13 +324,13 @@ export function initAbalone() {
     } else if (mode === 'online') {
       hudTurn.textContent = state.turn === myOwner ? 'À toi de jouer' : "À l'adversaire";
     } else {
-      hudTurn.textContent = `Au tour de : ${PLAYER_LABEL[state.turn]}`;
+      hudTurn.textContent = `Au tour de : ${playerLabel(state.turn)}`;
     }
     if (trayBlack) renderTray(trayBlack, state.score[BLACK]);
     if (trayWhite) renderTray(trayWhite, state.score[WHITE]);
     if (state.winner) {
       banner.classList.remove('hidden');
-      bannerText.textContent = `${PLAYER_LABEL[state.winner]} gagne ! (6 billes sorties)`;
+      bannerText.textContent = `${playerLabel(state.winner)} gagne ! (6 billes sorties)`;
     } else {
       banner.classList.add('hidden');
     }
@@ -454,6 +533,7 @@ export function initAbalone() {
     state = createInitialState();
     selected = []; currentMoves = []; phase = 'idle'; aimedMove = null;
     if (hudConn) hudConn.textContent = mode === 'online' ? '🌐' : mode === 'ai' ? '🤖' : '';
+    updateTrayLabels();
     buildBoard();
     renderBoardState();
     showScreen('screen-abalone-game');
@@ -462,6 +542,7 @@ export function initAbalone() {
 
   function handleAbaloneNetMessage(msg) {
     if (msg.type === 'hello') {
+      myOwner = msg.ownerForYou;
       startMatch('online');
     } else if (msg.type === 'move') {
       if (!state || state.winner) return;
@@ -481,14 +562,44 @@ export function initAbalone() {
     }
   }
 
+  // ---------- Choix de la palette de couleur des billes ----------
+  const palettePicker = document.getElementById('abalone-palette-picker');
+  function renderPalettePicker() {
+    if (!palettePicker) return;
+    palettePicker.innerHTML = '';
+    Object.keys(MARBLE_PALETTES).forEach((id) => {
+      const pal = MARBLE_PALETTES[id];
+      const btn = document.createElement('button');
+      btn.className = 'abalone-swatch' + (id === palette ? ' selected' : '');
+      btn.setAttribute('aria-label', pal.label);
+      btn.title = pal.label;
+      const left = document.createElement('span');
+      left.style.background = pal.swatch[0];
+      const right = document.createElement('span');
+      right.style.background = pal.swatch[1];
+      btn.appendChild(left);
+      btn.appendChild(right);
+      btn.addEventListener('click', () => {
+        if (palette === id) return;
+        palette = id;
+        savePalettePref(id);
+        renderPalettePicker();
+      });
+      palettePicker.appendChild(btn);
+    });
+  }
+  renderPalettePicker();
+
   document.getElementById('btn-abalone-local').addEventListener('click', () => startMatch('local'));
   document.getElementById('btn-abalone-rules').addEventListener('click', () => showScreen('screen-abalone-rules'));
   document.getElementById('btn-abalone-cancel').addEventListener('click', () => clearSelection());
   document.getElementById('btn-abalone-rematch').addEventListener('click', () => {
+    if (mode === 'ai') humanOwner = Math.random() < 0.5 ? BLACK : WHITE;
     matchToken++;
     aiThinking = false;
     state = createInitialState();
     clearSelection();
+    buildBoard();
     renderBoardState();
     if (mode === 'online') net && net.send({ type: 'rematch' });
     maybeScheduleAiMove();
@@ -504,7 +615,10 @@ export function initAbalone() {
   document.getElementById('btn-abalone-ai').addEventListener('click', () => showScreen('screen-abalone-ai-setup'));
   function startAbaloneAiGame(difficulty) {
     aiDifficulty = difficulty;
-    humanOwner = BLACK; // l'humain joue toujours en noir, et commence
+    // Camp tiré au hasard : BLACK commence toujours (règle du jeu), donc ce
+    // tirage décide aussi qui joue le premier coup. L'affichage est
+    // toujours retourné pour que l'humain se voie en bas.
+    humanOwner = Math.random() < 0.5 ? BLACK : WHITE;
     startMatch('ai');
   }
   document.getElementById('btn-abalone-ai-facile').addEventListener('click', () => startAbaloneAiGame('facile'));
@@ -521,12 +635,15 @@ export function initAbalone() {
     document.getElementById('abalone-online-choice').classList.add('hidden');
     document.getElementById('abalone-host-panel').classList.remove('hidden');
     abaloneHostStatus.textContent = '';
-    myOwner = BLACK; // l'hôte joue en noir, et commence la partie
+    // Camp tiré au hasard : BLACK commence toujours (règle du jeu), donc ce
+    // tirage décide aussi qui joue le premier coup. Chaque écran retourne
+    // ensuite son propre affichage pour que chacun se voie en bas.
+    myOwner = Math.random() < 0.5 ? BLACK : WHITE;
 
     net = new P2PConnection();
     net.onOpen = () => {
       abaloneHostStatus.textContent = 'Connecté ! Lancement de la partie…';
-      net.send({ type: 'hello', ownerForYou: WHITE });
+      net.send({ type: 'hello', ownerForYou: myOwner === BLACK ? WHITE : BLACK });
       setTimeout(() => startMatch('online'), 400);
     };
     net.onClose = () => {
@@ -557,7 +674,7 @@ export function initAbalone() {
     document.getElementById('abalone-join-panel').classList.remove('hidden');
     abaloneJoinOfferInput.value = '';
     abaloneJoinStatus.textContent = '';
-    myOwner = WHITE; // l'invité joue en blanc
+    // Le camp de l'invité est décidé par l'hôte et arrive avec le message 'hello'.
   });
 
   document.getElementById('btn-abalone-join-code').addEventListener('click', async () => {

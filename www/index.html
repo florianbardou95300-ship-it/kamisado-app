@@ -122,6 +122,9 @@
     <button class="btn btn-primary" id="btn-abalone-online">Jouer en ligne<br><span class="btn-sub">2 joueurs, 2 téléphones</span></button>
     <button class="btn btn-primary" id="btn-abalone-ai">Jouer contre l'IA<br><span class="btn-sub">Solo, adversaire programmé</span></button>
     <button class="btn btn-ghost" id="btn-abalone-rules">Règles du jeu</button>
+
+    <p class="step-label abalone-palette-label">Couleur des billes</p>
+    <div id="abalone-palette-picker" class="abalone-palette-picker"></div>
   </div>
 </div>
 
@@ -191,11 +194,11 @@
 
     <div class="abalone-trays">
       <div class="abalone-tray-group">
-        <span class="abalone-tray-label">Noir sorties</span>
+        <span class="abalone-tray-label" id="abalone-tray-label-black">Noir sorties</span>
         <svg id="abalone-tray-black" class="abalone-tray" viewBox="0 0 160 30"></svg>
       </div>
       <div class="abalone-tray-group">
-        <span class="abalone-tray-label">Blanc sorties</span>
+        <span class="abalone-tray-label" id="abalone-tray-label-white">Blanc sorties</span>
         <svg id="abalone-tray-white" class="abalone-tray" viewBox="0 0 160 30"></svg>
       </div>
     </div>

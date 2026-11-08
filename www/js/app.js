@@ -82,6 +82,18 @@ function startGame(newMode) {
 
 function cellKey(r, c) { return `${r},${c}`; }
 
+/**
+ * Le joueur humain voit toujours ses propres tours en bas de l'écran :
+ * si son camp logique est TOP, on retourne l'affichage du plateau à 180°
+ * (la logique du jeu, elle, reste inchangée — seul l'ordre d'affichage
+ * des cases est inversé).
+ */
+function isFlipped() {
+  if (mode === 'online') return myOwner === TOP;
+  if (mode === 'ai') return humanOwner === TOP;
+  return false;
+}
+
 function render() {
   boardEl.innerHTML = '';
   const movable = state.winner ? [] : movableTowers(state);
@@ -99,8 +111,11 @@ function render() {
     if (sel) highlightMoves = sel.moves;
   }
 
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
+  const flipped = isFlipped();
+  for (let dr = 0; dr < 8; dr++) {
+    for (let dc = 0; dc < 8; dc++) {
+      const r = flipped ? 7 - dr : dr;
+      const c = flipped ? 7 - dc : dc;
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.style.background = COLOR_HEX[squareColor(r, c)];
@@ -227,6 +242,7 @@ function maybeScheduleAiMove() {
 }
 
 document.getElementById('btn-rematch').addEventListener('click', () => {
+  if (mode === 'ai') humanOwner = Math.random() < 0.5 ? BOTTOM : TOP;
   state = createInitialState();
   selected = null;
   aiThinking = false;
@@ -258,7 +274,10 @@ document.getElementById('btn-ai').addEventListener('click', () => showScreen('sc
 // ---------- Mode IA ----------
 function startAiGame(difficulty) {
   aiDifficulty = difficulty;
-  humanOwner = BOTTOM; // l'humain joue toujours en bas, et commence
+  // Camp tiré au hasard : BOTTOM commence toujours la partie (règle du jeu),
+  // donc ce tirage décide aussi, au hasard, qui joue le premier coup.
+  // L'affichage est toujours retourné pour que l'humain se voie en bas.
+  humanOwner = Math.random() < 0.5 ? BOTTOM : TOP;
   startGame('ai');
 }
 document.getElementById('btn-ai-facile').addEventListener('click', () => startAiGame('facile'));
@@ -273,12 +292,15 @@ document.getElementById('btn-host').addEventListener('click', async () => {
   document.getElementById('online-choice').classList.add('hidden');
   document.getElementById('host-panel').classList.remove('hidden');
   hostStatus.textContent = '';
-  myOwner = BOTTOM; // l'hôte joue en bas, et commence la partie
+  // Camp tiré au hasard : BOTTOM commence toujours (règle du jeu), donc ce
+  // tirage décide aussi qui joue le premier coup. Chaque écran retourne
+  // ensuite son propre affichage pour que chacun se voie en bas.
+  myOwner = Math.random() < 0.5 ? BOTTOM : TOP;
 
   net = new P2PConnection();
   net.onOpen = () => {
     hostStatus.textContent = 'Connecté ! Lancement de la partie…';
-    net.send({ type: 'hello', ownerForYou: TOP });
+    net.send({ type: 'hello', ownerForYou: myOwner === BOTTOM ? TOP : BOTTOM });
     setTimeout(() => startGame('online'), 400);
   };
   net.onClose = () => {
@@ -310,7 +332,7 @@ document.getElementById('btn-join').addEventListener('click', () => {
   document.getElementById('join-panel').classList.remove('hidden');
   joinOfferInput.value = '';
   joinStatus.textContent = '';
-  myOwner = TOP; // l'invité joue en haut
+  // Le camp de l'invité est décidé par l'hôte et arrive avec le message 'hello'.
 });
 
 document.getElementById('btn-join-code').addEventListener('click', async () => {
@@ -338,6 +360,7 @@ document.getElementById('btn-join-code').addEventListener('click', async () => {
 
 function handleNetMessage(msg) {
   if (msg.type === 'hello') {
+    myOwner = msg.ownerForYou;
     startGame('online');
   } else if (msg.type === 'move') {
     performMove(msg.from[0], msg.from[1], msg.to[0], msg.to[1], true);
