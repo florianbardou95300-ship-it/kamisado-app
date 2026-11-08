@@ -1,5 +1,10 @@
 {
   "appId": "com.badou.kamisado",
   "appName": "Kamisado",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false
+    }
+  }
 }

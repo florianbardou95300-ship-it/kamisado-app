@@ -29,6 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write bundle version
+        run: echo "{\"version\": \"${{ github.run_number }}\"}" > www/version.json
+
+      - name: Package web bundle for in-app updates
+        working-directory: www
+        run: zip -r ../kamisado-web-bundle.zip . -x ".*"
+
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
@@ -52,4 +59,6 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Kamisado — build ${{ github.run_number }}
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            kamisado-web-bundle.zip

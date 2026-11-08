@@ -9,6 +9,7 @@
   "dependencies": {
     "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",
+    "@capgo/capacitor-updater": "^6.53.0",
     "peerjs": "^1.5.5"
   },
   "devDependencies": {

@@ -7,6 +7,9 @@ import { chooseAiMove } from './ai.js';
 import {
   playMoveSound, playWinSound, startMusic, stopMusic, isMusicPrefOn, setMusicPref,
 } from './audio.js';
+import { initUpdater } from './updater.js';
+
+initUpdater();
 
 const COLOR_LABEL = {
   orange: 'Orange', blue: 'Bleu', purple: 'Violet', pink: 'Rose',
