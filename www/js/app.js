@@ -125,7 +125,7 @@ function render() {
 
   if (state.winner) {
     hudTurn.textContent = `${PLAYER_LABEL[state.winner]} gagne !`;
-    hudRequired.textContent = state.loseReason === 'blocked' ? 'Tour bloquée' : 'Ligne adverse atteinte';
+    hudRequired.textContent = state.loseReason === 'deadlock' ? 'Double blocage' : 'Ligne adverse atteinte';
     showBanner(state);
   } else if (aiThinking) {
     hudTurn.textContent = "L'IA réfléchit…";
@@ -138,16 +138,20 @@ function render() {
     else if (mode === 'ai') turnLabel = state.turn === humanOwner ? 'À toi de jouer' : "Tour de l'IA";
     else turnLabel = `Tour : ${PLAYER_LABEL[state.turn]}`;
     hudTurn.textContent = turnLabel;
-    hudRequired.textContent = state.requiredColor
+    let requiredText = state.requiredColor
       ? `Tour imposée : ${COLOR_LABEL[state.requiredColor]}`
       : 'Premier coup : libre';
+    if (state.skipInfo) {
+      requiredText += ` · ${PLAYER_LABEL[state.skipInfo.skippedOwner]} bloqué(e), ${PLAYER_LABEL[state.turn]} rejoue`;
+    }
+    hudRequired.textContent = requiredText;
   }
 }
 
 function showBanner(finalState) {
   const winnerLabel = PLAYER_LABEL[finalState.winner];
-  const reason = finalState.loseReason === 'blocked'
-    ? 'la tour imposée ne pouvait plus bouger.'
+  const reason = finalState.loseReason === 'deadlock'
+    ? 'double blocage : sa tour de réponse ne pouvait plus bouger non plus.'
     : 'a atteint la rangée adverse.';
   bannerText.textContent = `${winnerLabel} gagne — ${reason}`;
   banner.classList.remove('hidden');
