@@ -52,14 +52,20 @@ export function initUpdater() {
 
   (async () => {
     try {
-      const [current, latest] = await Promise.all([getCurrentVersion(), getLatestRelease()]);
+      const current = await getCurrentVersion();
+      const latest = await getLatestRelease();
       if (latest.version > current && latest.downloadUrl) {
         pending = latest;
         btn.classList.remove('hidden');
+        if (statusEl) statusEl.textContent = '';
+      } else if (statusEl) {
+        // Diagnostic visible : utile pour vérifier que la vérification a
+        // bien tourné et ce qu'elle a trouvé, sans gêner l'utilisateur
+        // (le bouton reste caché s'il n'y a rien à faire).
+        statusEl.textContent = `À jour (version ${current}).`;
       }
     } catch (e) {
-      // Pas de connexion ou GitHub inaccessible : on ne dérange pas
-      // l'utilisateur, il pourra réessayer plus tard.
+      if (statusEl) statusEl.textContent = `Vérification impossible : ${e && e.message ? e.message : e}`;
     }
   })();
 
@@ -77,14 +83,14 @@ export function initUpdater() {
         version: String(pending.version),
       });
       if (statusEl) statusEl.textContent = 'Installation…';
-      await plugin.set(bundle);
+      await plugin.set({ id: bundle.id });
       // set() recharge l'appli avec le nouveau contenu ; si jamais il
       // ne le fait pas automatiquement sur cette version du plugin, on
       // force un rechargement pour être sûr.
       window.location.reload();
     } catch (e) {
       btn.disabled = false;
-      if (statusEl) statusEl.textContent = 'Mise à jour impossible. Vérifie ta connexion et réessaie.';
+      if (statusEl) statusEl.textContent = `Mise à jour impossible : ${e && e.message ? e.message : e}`;
     }
   });
 }
