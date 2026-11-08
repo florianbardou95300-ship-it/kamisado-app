@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Write bundle version
-        run: echo "{\"version\": \"${{ github.run_number }}\"}" > www/version.json
+        run: 'echo "{\"version\": \"${{ github.run_number }}\"}" > www/version.json'
 
       - name: Package web bundle for in-app updates
         working-directory: www
