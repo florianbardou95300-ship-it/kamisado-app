@@ -12,6 +12,7 @@
 
 const REPO = 'florianbardou95300-ship-it/kamisado-app';
 const BUNDLE_ASSET_NAME = 'samourai-web-bundle.zip';
+const CHECKSUM_ASSET_NAME = 'samourai-web-bundle.sha256';
 
 function getUpdaterPlugin() {
   return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater;
@@ -34,8 +35,22 @@ async function getLatestRelease() {
   const data = await res.json();
   const match = /build-(\d+)/.exec(data.tag_name || '');
   const version = match ? parseInt(match[1], 10) : 0;
-  const asset = (data.assets || []).find((a) => a.name === BUNDLE_ASSET_NAME);
-  return { version, downloadUrl: asset ? asset.browser_download_url : null };
+  const assets = data.assets || [];
+  const bundleAsset = assets.find((a) => a.name === BUNDLE_ASSET_NAME);
+  const checksumAsset = assets.find((a) => a.name === CHECKSUM_ASSET_NAME);
+  let checksum = '';
+  if (checksumAsset) {
+    // Le plugin de mise à jour exige un checksum SHA-256 du zip pour les
+    // téléchargements "manuels" (sans backend dédié) : sans lui, il rejette
+    // systématiquement avec "Checksum required".
+    const checksumRes = await fetch(checksumAsset.browser_download_url, { cache: 'no-store' });
+    if (checksumRes.ok) checksum = (await checksumRes.text()).trim();
+  }
+  return {
+    version,
+    downloadUrl: bundleAsset ? bundleAsset.browser_download_url : null,
+    checksum,
+  };
 }
 
 export function initUpdater() {
@@ -54,7 +69,7 @@ export function initUpdater() {
     try {
       const current = await getCurrentVersion();
       const latest = await getLatestRelease();
-      if (latest.version > current && latest.downloadUrl) {
+      if (latest.version > current && latest.downloadUrl && latest.checksum) {
         pending = latest;
         btn.classList.remove('hidden');
         if (statusEl) statusEl.textContent = '';
@@ -81,6 +96,7 @@ export function initUpdater() {
       const bundle = await plugin.download({
         url: pending.downloadUrl,
         version: String(pending.version),
+        checksum: pending.checksum,
       });
       if (statusEl) statusEl.textContent = 'Installation…';
       await plugin.set({ id: bundle.id });

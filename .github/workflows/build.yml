@@ -36,6 +36,9 @@ jobs:
         working-directory: www
         run: zip -r ../samourai-web-bundle.zip . -x ".*"
 
+      - name: Checksum web bundle (requis par capacitor-updater)
+        run: sha256sum samourai-web-bundle.zip | awk '{print $1}' > samourai-web-bundle.sha256
+
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
@@ -62,3 +65,4 @@ jobs:
           files: |
             android/app/build/outputs/apk/debug/app-debug.apk
             samourai-web-bundle.zip
+            samourai-web-bundle.sha256
