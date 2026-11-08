@@ -118,7 +118,46 @@
     <h1 class="title">Abalone</h1>
     <p class="subtitle">Pousse 6 billes adverses hors du plateau</p>
     <button class="btn btn-primary" id="btn-abalone-local">Jouer en local<br><span class="btn-sub">2 joueurs, même téléphone</span></button>
+    <button class="btn btn-primary" id="btn-abalone-online">Jouer en ligne<br><span class="btn-sub">2 joueurs, 2 téléphones</span></button>
+    <button class="btn btn-primary" id="btn-abalone-ai">Jouer contre l'IA<br><span class="btn-sub">Solo, adversaire programmé</span></button>
     <button class="btn btn-ghost" id="btn-abalone-rules">Règles du jeu</button>
+  </div>
+</div>
+
+<div id="screen-abalone-online-setup" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-abalone-menu">‹ Retour</button>
+    <h2 class="title-sm">Partie en ligne</h2>
+
+    <div id="abalone-online-choice">
+      <button class="btn btn-primary" id="btn-abalone-host">Créer une partie</button>
+      <button class="btn btn-primary" id="btn-abalone-join">Rejoindre une partie</button>
+    </div>
+
+    <div id="abalone-host-panel" class="hidden panel">
+      <p class="step-label">Donne ce code à ton adversaire</p>
+      <div id="abalone-host-offer-code" class="code-box code-box-display" aria-live="polite">…</div>
+      <button class="btn btn-secondary" id="btn-abalone-share-offer">Partager / Copier le code</button>
+      <p id="abalone-host-status" class="status-text"></p>
+    </div>
+
+    <div id="abalone-join-panel" class="hidden panel">
+      <p class="step-label">Entre le code donné par l'hôte</p>
+      <input id="abalone-join-offer-input" class="code-box code-box-input" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="15" placeholder="Ex. AB12CD" />
+      <button class="btn btn-primary" id="btn-abalone-join-code">Rejoindre</button>
+      <p id="abalone-join-status" class="status-text"></p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-abalone-ai-setup" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-abalone-menu">‹ Retour</button>
+    <h2 class="title-sm">Contre l'IA</h2>
+    <p class="subtitle">Choisis la difficulté</p>
+    <button class="btn btn-primary" id="btn-abalone-ai-facile">Facile<br><span class="btn-sub">Pour découvrir le jeu</span></button>
+    <button class="btn btn-primary" id="btn-abalone-ai-moyen">Moyen<br><span class="btn-sub">Réfléchit quelques coups à l'avance</span></button>
+    <button class="btn btn-primary" id="btn-abalone-ai-difficile">Difficile<br><span class="btn-sub">Calcule en profondeur, sans pitié</span></button>
   </div>
 </div>
 
@@ -144,6 +183,7 @@
         <div id="abalone-hud-turn" class="hud-turn">—</div>
       </div>
       <div class="hud-right">
+        <span class="hud-conn-icon" id="abalone-hud-conn"></span>
         <button class="icon-btn" id="btn-abalone-cancel">↺</button>
       </div>
     </div>

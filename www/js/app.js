@@ -28,7 +28,10 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+// Les écrans Abalone gèrent leurs propres boutons "retour" (et leur
+// propre connexion réseau) dans abalone-ui.js.
 document.querySelectorAll('[data-back]').forEach((btn) => {
+  if (btn.closest('[id^="screen-abalone"]')) return;
   btn.addEventListener('click', () => {
     if (net) { net.close(); net = null; }
     showScreen(btn.dataset.back);

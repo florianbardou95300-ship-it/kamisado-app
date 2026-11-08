@@ -15,7 +15,12 @@
 export const BLACK = 'black';
 export const WHITE = 'white';
 
-const RADIUS = 4;
+export const RADIUS = 4;
+
+/** Distance (en cases) du centre du plateau. */
+export function hexDistance(q, r) {
+  return Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r));
+}
 
 // 6 directions, en paires d'axes opposés : [0,3], [1,4], [2,5]
 export const DIRECTIONS = [
@@ -199,6 +204,42 @@ export function applyGroupMove(state, ordered, move, owner) {
 
   const winner = score[owner] >= 6 ? owner : null;
   return { cells, turn: otherOwner(owner), score, winner };
+}
+
+/**
+ * Énumère tous les coups légaux pour `owner`, tous groupes possibles
+ * (taille 1 à 3) confondus. Renvoie un tableau de { ordered, move },
+ * directement réutilisable avec applyGroupMove. Utilisé par l'IA et
+ * par la validation côté réseau.
+ */
+export function allLegalMoves(state, owner) {
+  const results = [];
+  const seen = new Set();
+
+  function tryGroup(cellsArr) {
+    const key = cellsArr.map((c) => cellKey(c.q, c.r)).sort().join('|');
+    if (seen.has(key)) return;
+    seen.add(key);
+    const v = validateGroup(state, cellsArr, owner);
+    if (!v.valid) return;
+    const moves = legalMovesForGroup(state, v.ordered, v.axisIndex, owner, v.axisDir);
+    for (const move of moves) results.push({ ordered: v.ordered, move });
+  }
+
+  for (const c of allCells()) {
+    if (ownerAt(state, c.q, c.r) !== owner) continue;
+    tryGroup([c]);
+    for (let dir = 0; dir < 3; dir++) {
+      const n1 = neighbor(c.q, c.r, dir);
+      if (ownerAt(state, n1.q, n1.r) !== owner) continue;
+      tryGroup([c, n1]);
+      const n2 = neighbor(n1.q, n1.r, dir);
+      if (ownerAt(state, n2.q, n2.r) === owner) {
+        tryGroup([c, n1, n2]);
+      }
+    }
+  }
+  return results;
 }
 
 /** Pour l'UI : cases occupées par `owner` adjacentes à (q,r) dans une direction donnée. */

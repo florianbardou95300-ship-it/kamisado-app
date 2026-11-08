@@ -20,6 +20,8 @@ import {
   validateGroup, legalMovesForGroup, applyGroupMove,
 } from './abalone.js';
 import { playAbaloneMoveSound, playAbaloneCaptureSound } from './audio.js';
+import { chooseAbaloneAiMove } from './abalone-ai.js';
+import { P2PConnection } from './webrtc.js';
 
 const UNIT = 11; // espacement entre centres de cases voisines
 const RADIUS_CELL = 4.6; // rayon d'une case / bille
@@ -41,6 +43,22 @@ function hexToPixel(q, r) {
 }
 
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+async function shareOrCopy(text) {
+  if (!text) return;
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch (e) { /* annulé, on retente la copie */ }
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Code copié dans le presse-papiers.');
+  } catch (e) {
+    alert('Impossible de copier automatiquement. Sélectionne le texte manuellement.');
+  }
+}
 
 const TRAY_SLOTS = 6;
 
@@ -83,6 +101,7 @@ export function initAbalone() {
   const trayWhite = document.getElementById('abalone-tray-white');
   const banner = document.getElementById('abalone-banner');
   const bannerText = document.getElementById('abalone-banner-text');
+  const hudConn = document.getElementById('abalone-hud-conn');
 
   const cells = allCells();
   const pixelByKey = new Map();
@@ -105,6 +124,14 @@ export function initAbalone() {
   let dragStart = null;
   let aimedMove = null;
   let capsuleEl = null;
+
+  let mode = 'local'; // 'local' | 'ai' | 'online'
+  let humanOwner = BLACK; // mode IA : camp tenu par l'humain (l'IA joue l'autre)
+  let myOwner = BLACK; // mode en ligne : rôle du joueur local
+  let aiDifficulty = 'moyen';
+  let aiThinking = false;
+  let matchToken = 0; // incrémenté à chaque nouvelle partie, pour ignorer un coup IA en retard
+  let net = null; // P2PConnection en mode en ligne
 
   function pixelOf(c) { return pixelByKey.get(`${c.q},${c.r}`); }
   function cellEl(q, r) { return svg.querySelector(`[data-cell="${q},${r}"]`); }
@@ -213,7 +240,13 @@ export function initAbalone() {
         glint.setAttribute('visibility', 'hidden');
       }
     }
-    hudTurn.textContent = `Au tour de : ${PLAYER_LABEL[state.turn]}`;
+    if (aiThinking) {
+      hudTurn.textContent = "L'IA réfléchit…";
+    } else if (mode === 'online') {
+      hudTurn.textContent = state.turn === myOwner ? 'À toi de jouer' : "À l'adversaire";
+    } else {
+      hudTurn.textContent = `Au tour de : ${PLAYER_LABEL[state.turn]}`;
+    }
     if (trayBlack) renderTray(trayBlack, state.score[BLACK]);
     if (trayWhite) renderTray(trayWhite, state.score[WHITE]);
     if (state.winner) {
@@ -297,18 +330,53 @@ export function initAbalone() {
     aimedMove = null;
   }
 
-  function executeMove(picked) {
+  function executeMove(picked, fromRemote) {
     const capture = picked.move.capture;
-    state = applyGroupMove(state, picked.ordered, picked.move, state.turn);
+    const mover = state.turn;
+    state = applyGroupMove(state, picked.ordered, picked.move, mover);
     selected = [];
     currentMoves = [];
     renderBoardState();
     renderCapsule(null, null);
     if (capture) playAbaloneCaptureSound(); else playAbaloneMoveSound();
+
+    if (mode === 'online' && !fromRemote && net) {
+      net.send({
+        type: 'move',
+        group: picked.ordered.map((c) => ({ q: c.q, r: c.r })),
+        dirIndex: picked.move.dirIndex,
+      });
+    }
+    if (!fromRemote) maybeScheduleAiMove();
+  }
+
+  /** En mode IA, si c'est au tour de la machine, calcule et joue son coup. */
+  function maybeScheduleAiMove() {
+    if (mode !== 'ai' || !state || state.winner || state.turn === humanOwner) return;
+    aiThinking = true;
+    renderBoardState();
+    const token = matchToken;
+    setTimeout(() => {
+      if (token !== matchToken) return; // partie quittée/relancée entre-temps
+      const picked = chooseAbaloneAiMove(state, aiDifficulty);
+      aiThinking = false;
+      if (picked) {
+        executeMove(picked, false);
+      } else {
+        renderBoardState();
+      }
+    }, 350);
+  }
+
+  function canInteract() {
+    if (!state || state.winner || aiThinking) return false;
+    if (mode === 'ai') return state.turn === humanOwner;
+    if (mode === 'online') return state.turn === myOwner;
+    return true;
   }
 
   function onPointerDown(e) {
-    if (!state || state.winner) return;
+    if (!canInteract()) return;
     const p = toSvgPoint(e);
     const downCell = nearestCell(p);
     if (!downCell) return;
@@ -379,19 +447,152 @@ export function initAbalone() {
     finishGesture(false);
   }
 
-  document.getElementById('btn-abalone-local').addEventListener('click', () => {
+  function startMatch(newMode) {
+    mode = newMode;
+    matchToken++;
+    aiThinking = false;
     state = createInitialState();
     selected = []; currentMoves = []; phase = 'idle'; aimedMove = null;
+    if (hudConn) hudConn.textContent = mode === 'online' ? '🌐' : mode === 'ai' ? '🤖' : '';
     buildBoard();
     renderBoardState();
     showScreen('screen-abalone-game');
-  });
+    maybeScheduleAiMove();
+  }
+
+  function handleAbaloneNetMessage(msg) {
+    if (msg.type === 'hello') {
+      startMatch('online');
+    } else if (msg.type === 'move') {
+      if (!state || state.winner) return;
+      const group = msg.group.map((c) => ({ q: c.q, r: c.r }));
+      const v = validateGroup(state, group, state.turn);
+      if (!v.valid) return;
+      const moves = legalMovesForGroup(state, v.ordered, v.axisIndex, state.turn, v.axisDir);
+      const move = moves.find((m) => m.dirIndex === msg.dirIndex);
+      if (!move) return;
+      executeMove({ ordered: v.ordered, move }, true);
+    } else if (msg.type === 'rematch') {
+      matchToken++;
+      aiThinking = false;
+      state = createInitialState();
+      clearSelection();
+      renderBoardState();
+    }
+  }
+
+  document.getElementById('btn-abalone-local').addEventListener('click', () => startMatch('local'));
   document.getElementById('btn-abalone-rules').addEventListener('click', () => showScreen('screen-abalone-rules'));
-  document.getElementById('btn-abalone-quit').addEventListener('click', () => showScreen('screen-abalone-menu'));
   document.getElementById('btn-abalone-cancel').addEventListener('click', () => clearSelection());
   document.getElementById('btn-abalone-rematch').addEventListener('click', () => {
+    matchToken++;
+    aiThinking = false;
     state = createInitialState();
     clearSelection();
     renderBoardState();
+    if (mode === 'online') net && net.send({ type: 'rematch' });
+    maybeScheduleAiMove();
+  });
+  document.getElementById('btn-abalone-quit').addEventListener('click', () => {
+    matchToken++;
+    aiThinking = false;
+    if (net) { net.close(); net = null; }
+    showScreen('screen-abalone-menu');
+  });
+
+  // ---------- Mode IA ----------
+  document.getElementById('btn-abalone-ai').addEventListener('click', () => showScreen('screen-abalone-ai-setup'));
+  function startAbaloneAiGame(difficulty) {
+    aiDifficulty = difficulty;
+    humanOwner = BLACK; // l'humain joue toujours en noir, et commence
+    startMatch('ai');
+  }
+  document.getElementById('btn-abalone-ai-facile').addEventListener('click', () => startAbaloneAiGame('facile'));
+  document.getElementById('btn-abalone-ai-moyen').addEventListener('click', () => startAbaloneAiGame('moyen'));
+  document.getElementById('btn-abalone-ai-difficile').addEventListener('click', () => startAbaloneAiGame('difficile'));
+
+  // ---------- Mode en ligne ----------
+  document.getElementById('btn-abalone-online').addEventListener('click', () => showScreen('screen-abalone-online-setup'));
+
+  const abaloneHostOfferCode = document.getElementById('abalone-host-offer-code');
+  const abaloneHostStatus = document.getElementById('abalone-host-status');
+
+  document.getElementById('btn-abalone-host').addEventListener('click', async () => {
+    document.getElementById('abalone-online-choice').classList.add('hidden');
+    document.getElementById('abalone-host-panel').classList.remove('hidden');
+    abaloneHostStatus.textContent = '';
+    myOwner = BLACK; // l'hôte joue en noir, et commence la partie
+
+    net = new P2PConnection();
+    net.onOpen = () => {
+      abaloneHostStatus.textContent = 'Connecté ! Lancement de la partie…';
+      net.send({ type: 'hello', ownerForYou: WHITE });
+      setTimeout(() => startMatch('online'), 400);
+    };
+    net.onClose = () => {
+      if (!document.getElementById('screen-abalone-game').classList.contains('active')) return;
+      abaloneHostStatus.textContent = 'Connexion perdue.';
+    };
+    net.onMessage = (msg) => handleAbaloneNetMessage(msg);
+    net.onError = (message) => { abaloneHostStatus.textContent = message; };
+
+    abaloneHostOfferCode.textContent = 'Génération du code…';
+    try {
+      const code = await net.hostGame();
+      abaloneHostOfferCode.textContent = code;
+      abaloneHostStatus.textContent = "En attente de l'autre joueur…";
+    } catch (e) {
+      abaloneHostOfferCode.textContent = '—';
+      abaloneHostStatus.textContent = 'Impossible de créer la partie. Vérifie ta connexion internet et réessaie.';
+    }
+  });
+
+  document.getElementById('btn-abalone-share-offer').addEventListener('click', () => shareOrCopy(abaloneHostOfferCode.textContent));
+
+  const abaloneJoinOfferInput = document.getElementById('abalone-join-offer-input');
+  const abaloneJoinStatus = document.getElementById('abalone-join-status');
+
+  document.getElementById('btn-abalone-join').addEventListener('click', () => {
+    document.getElementById('abalone-online-choice').classList.add('hidden');
+    document.getElementById('abalone-join-panel').classList.remove('hidden');
+    abaloneJoinOfferInput.value = '';
+    abaloneJoinStatus.textContent = '';
+    myOwner = WHITE; // l'invité joue en blanc
+  });
+
+  document.getElementById('btn-abalone-join-code').addEventListener('click', async () => {
+    const code = abaloneJoinOfferInput.value.trim();
+    if (!code) return;
+    abaloneJoinStatus.textContent = 'Connexion en cours…';
+
+    net = new P2PConnection();
+    net.onOpen = () => {
+      abaloneJoinStatus.textContent = 'Connecté ! En attente du lancement…';
+    };
+    net.onClose = () => {
+      if (!document.getElementById('screen-abalone-game').classList.contains('active')) return;
+      abaloneJoinStatus.textContent = 'Connexion perdue.';
+    };
+    net.onMessage = (msg) => handleAbaloneNetMessage(msg);
+    net.onError = (message) => { abaloneJoinStatus.textContent = message; };
+
+    try {
+      await net.joinGame(code);
+    } catch (e) {
+      // le message lisible est déjà posé par onError ci-dessus
+    }
+  });
+
+  // Les écrans en ligne repartent de zéro (choix host/rejoindre caché) à chaque retour.
+  document.querySelectorAll('[id^="screen-abalone"] [data-back]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      matchToken++;
+      aiThinking = false;
+      if (net) { net.close(); net = null; }
+      document.getElementById('abalone-online-choice').classList.remove('hidden');
+      document.getElementById('abalone-host-panel').classList.add('hidden');
+      document.getElementById('abalone-join-panel').classList.add('hidden');
+      showScreen(btn.dataset.back);
+    });
   });
 }

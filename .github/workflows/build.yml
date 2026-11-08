@@ -37,7 +37,11 @@ jobs:
         run: zip -r ../samourai-web-bundle.zip . -x ".*"
 
       - name: Checksum web bundle (requis par capacitor-updater)
-        run: sha256sum samourai-web-bundle.zip | awk '{print $1}' > samourai-web-bundle.sha256
+        id: checksum
+        run: |
+          SUM=$(sha256sum samourai-web-bundle.zip | awk '{print $1}')
+          echo "$SUM" > samourai-web-bundle.sha256
+          echo "sum=$SUM" >> "$GITHUB_OUTPUT"
 
       - name: Sync Capacitor Android project
         run: npx cap sync android
@@ -62,6 +66,7 @@ jobs:
         with:
           tag_name: build-${{ github.run_number }}
           name: Kamisado — build ${{ github.run_number }}
+          body: "bundle-sha256:${{ steps.checksum.outputs.sum }}"
           files: |
             android/app/build/outputs/apk/debug/app-debug.apk
             samourai-web-bundle.zip

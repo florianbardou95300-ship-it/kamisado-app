@@ -12,7 +12,6 @@
 
 const REPO = 'florianbardou95300-ship-it/kamisado-app';
 const BUNDLE_ASSET_NAME = 'samourai-web-bundle.zip';
-const CHECKSUM_ASSET_NAME = 'samourai-web-bundle.sha256';
 
 function getUpdaterPlugin() {
   return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater;
@@ -35,17 +34,15 @@ async function getLatestRelease() {
   const data = await res.json();
   const match = /build-(\d+)/.exec(data.tag_name || '');
   const version = match ? parseInt(match[1], 10) : 0;
-  const assets = data.assets || [];
-  const bundleAsset = assets.find((a) => a.name === BUNDLE_ASSET_NAME);
-  const checksumAsset = assets.find((a) => a.name === CHECKSUM_ASSET_NAME);
-  let checksum = '';
-  if (checksumAsset) {
-    // Le plugin de mise à jour exige un checksum SHA-256 du zip pour les
-    // téléchargements "manuels" (sans backend dédié) : sans lui, il rejette
-    // systématiquement avec "Checksum required".
-    const checksumRes = await fetch(checksumAsset.browser_download_url, { cache: 'no-store' });
-    if (checksumRes.ok) checksum = (await checksumRes.text()).trim();
-  }
+  const bundleAsset = (data.assets || []).find((a) => a.name === BUNDLE_ASSET_NAME);
+  // Le plugin de mise à jour exige un checksum SHA-256 du zip pour les
+  // téléchargements "manuels" (sans backend dédié) : sans lui, il rejette
+  // systématiquement avec "Checksum required". On le lit dans la
+  // description de la release plutôt que dans un fichier séparé : les
+  // assets de release sur GitHub n'ont pas d'en-têtes CORS et un fetch()
+  // direct depuis l'appli échouerait, alors que l'API JSON ci-dessus en a.
+  const checksumMatch = /bundle-sha256:([a-f0-9]{64})/.exec(data.body || '');
+  const checksum = checksumMatch ? checksumMatch[1] : '';
   return {
     version,
     downloadUrl: bundleAsset ? bundleAsset.browser_download_url : null,
