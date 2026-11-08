@@ -4,11 +4,16 @@ import {
 } from './kamisado.js';
 import { P2PConnection } from './webrtc.js';
 import { chooseAiMove } from './ai.js';
+import {
+  playMoveSound, playWinSound, startMusic, stopMusic, isMusicPrefOn, setMusicPref,
+} from './audio.js';
 
 const COLOR_LABEL = {
   orange: 'Orange', blue: 'Bleu', purple: 'Violet', pink: 'Rose',
   yellow: 'Jaune', red: 'Rouge', green: 'Vert', brown: 'Marron',
 };
+
+const PLAYER_LABEL = { [TOP]: 'Joueur 2', [BOTTOM]: 'Joueur 1' };
 
 // ---------- Navigation entre écrans ----------
 function showScreen(id) {
@@ -36,8 +41,20 @@ const boardEl = document.getElementById('board');
 const hudTurn = document.getElementById('hud-turn');
 const hudRequired = document.getElementById('hud-required');
 const hudConn = document.getElementById('hud-conn');
+const btnMusic = document.getElementById('btn-music');
 const banner = document.getElementById('banner');
 const bannerText = document.getElementById('banner-text');
+
+function updateMusicButton() {
+  btnMusic.textContent = isMusicPrefOn() ? '🔊' : '🔇';
+}
+updateMusicButton();
+btnMusic.addEventListener('click', () => {
+  const next = !isMusicPrefOn();
+  setMusicPref(next);
+  updateMusicButton();
+  if (next) startMusic(); else stopMusic();
+});
 
 function startGame(newMode) {
   mode = newMode;
@@ -49,6 +66,7 @@ function startGame(newMode) {
   showScreen('screen-game');
   render();
   maybeScheduleAiMove();
+  if (isMusicPrefOn()) startMusic();
 }
 
 function cellKey(r, c) { return `${r},${c}`; }
@@ -92,6 +110,9 @@ function render() {
         t.className = `tower owner-${tower.owner}`;
         t.style.background = COLOR_HEX[tower.color];
         if (selected && selected[0] === r && selected[1] === c) t.classList.add('selected');
+        const mark = document.createElement('div');
+        mark.className = 'tower-mark';
+        t.appendChild(mark);
         cell.appendChild(t);
       }
 
@@ -103,9 +124,7 @@ function render() {
   }
 
   if (state.winner) {
-    hudTurn.textContent = state.winner === myOwner || mode === 'local'
-      ? `${state.winner === TOP ? 'Haut' : 'Bas'} gagne !`
-      : `${state.winner === TOP ? 'Haut' : 'Bas'} gagne !`;
+    hudTurn.textContent = `${PLAYER_LABEL[state.winner]} gagne !`;
     hudRequired.textContent = state.loseReason === 'blocked' ? 'Tour bloquée' : 'Ligne adverse atteinte';
     showBanner(state);
   } else if (aiThinking) {
@@ -117,7 +136,7 @@ function render() {
     let turnLabel;
     if (mode === 'online') turnLabel = state.turn === myOwner ? 'À toi de jouer' : "À l'adversaire";
     else if (mode === 'ai') turnLabel = state.turn === humanOwner ? 'À toi de jouer' : "Tour de l'IA";
-    else turnLabel = `Tour : ${state.turn === TOP ? 'Haut' : 'Bas'}`;
+    else turnLabel = `Tour : ${PLAYER_LABEL[state.turn]}`;
     hudTurn.textContent = turnLabel;
     hudRequired.textContent = state.requiredColor
       ? `Tour imposée : ${COLOR_LABEL[state.requiredColor]}`
@@ -126,7 +145,7 @@ function render() {
 }
 
 function showBanner(finalState) {
-  const winnerLabel = finalState.winner === TOP ? 'Joueur du haut' : 'Joueur du bas';
+  const winnerLabel = PLAYER_LABEL[finalState.winner];
   const reason = finalState.loseReason === 'blocked'
     ? 'la tour imposée ne pouvait plus bouger.'
     : 'a atteint la rangée adverse.';
@@ -167,6 +186,7 @@ function onCellClick(r, c, movableMap) {
 function performMove(fromR, fromC, toR, toC, fromRemote) {
   state = applyMove(state, fromR, fromC, toR, toC);
   render();
+  if (state.winner) playWinSound(); else playMoveSound();
   if (mode === 'online' && !fromRemote) {
     net && net.send({ type: 'move', from: [fromR, fromC], to: [toR, toC] });
   }
@@ -205,6 +225,7 @@ document.getElementById('btn-rematch').addEventListener('click', () => {
 
 document.getElementById('btn-quit').addEventListener('click', () => {
   if (net) { net.close(); net = null; }
+  stopMusic();
   showScreen('screen-menu');
 });
 
