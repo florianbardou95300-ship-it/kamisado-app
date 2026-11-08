@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="kamisadoBg" cx="50%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#3a2350"/>
+      <stop offset="55%" stop-color="#271739"/>
+      <stop offset="100%" stop-color="#160d22"/>
+    </radialGradient>
+    <radialGradient id="kamisadoSun" cx="50%" cy="38%" r="22%">
+      <stop offset="0%" stop-color="#ffd27a" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#e8833a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#e8833a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="kamisadoWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a3468" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#160d22" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="kamisadoWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff7a4a"/>
+      <stop offset="45%" stop-color="#e8452a"/>
+      <stop offset="100%" stop-color="#a81f18"/>
+    </linearGradient>
+    <linearGradient id="kamisadoWoodDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a1a18"/>
+      <stop offset="100%" stop-color="#20100f"/>
+    </linearGradient>
+    <clipPath id="kamisadoClip"><rect x="0" y="0" width="1024" height="1024" rx="220"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#kamisadoClip)">
+    <rect width="1024" height="1024" fill="url(#kamisadoBg)"/>
+    <circle cx="512" cy="390" r="230" fill="url(#kamisadoSun)"/>
+    <rect x="0" y="690" width="1024" height="140" fill="url(#kamisadoWater)"/>
+
+    <rect x="328" y="300" width="66" height="500" rx="6" fill="url(#kamisadoWood)"/>
+    <rect x="630" y="300" width="66" height="500" rx="6" fill="url(#kamisadoWood)"/>
+    <rect x="312" y="788" width="98" height="34" rx="6" fill="url(#kamisadoWoodDark)"/>
+    <rect x="614" y="788" width="98" height="34" rx="6" fill="url(#kamisadoWoodDark)"/>
+    <rect x="280" y="460" width="464" height="48" rx="8" fill="url(#kamisadoWood)"/>
+    <rect x="497" y="364" width="30" height="100" fill="url(#kamisadoWood)"/>
+    <rect x="230" y="306" width="564" height="58" rx="10" fill="url(#kamisadoWood)"/>
+    <path d="M212,322
+             C212,300 234,288 262,288
+             L762,288
+             C790,288 812,300 812,322
+             L812,344
+             C812,328 790,320 762,320
+             L262,320
+             C234,320 212,328 212,344
+             Z" fill="url(#kamisadoWoodDark)"/>
+  </g>
+</svg>

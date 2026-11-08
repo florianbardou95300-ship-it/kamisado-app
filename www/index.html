@@ -12,8 +12,14 @@
   <div class="menu-card">
     <h1 class="title">Samouraï Game</h1>
     <p class="subtitle">Choisis ton jeu</p>
-    <button class="btn btn-primary" id="btn-game-kamisado">Kamisado<br><span class="btn-sub">Le jeu des tours de couleur</span></button>
-    <button class="btn btn-primary" id="btn-game-abalone">Abalone<br><span class="btn-sub">Billes hexagonales, pousse l'adversaire hors du plateau</span></button>
+    <button class="btn btn-primary btn-game" id="btn-game-kamisado">
+      <img class="btn-game-logo" src="img/logo-kamisado.svg" alt="" />
+      <span class="btn-game-text">Kamisado<br><span class="btn-sub">Le jeu des tours de couleur</span></span>
+    </button>
+    <button class="btn btn-primary btn-game" id="btn-game-abalone">
+      <img class="btn-game-logo" src="img/logo-abalone.svg" alt="" />
+      <span class="btn-game-text">Abalone<br><span class="btn-sub">Billes hexagonales, pousse l'adversaire hors du plateau</span></span>
+    </button>
     <button class="btn btn-secondary hidden" id="btn-update">Mettre à jour</button>
     <p id="update-status" class="status-text"></p>
   </div>
@@ -136,10 +142,20 @@
       <button class="icon-btn" id="btn-abalone-quit">‹</button>
       <div class="hud-center">
         <div id="abalone-hud-turn" class="hud-turn">—</div>
-        <div id="abalone-hud-score" class="hud-required"></div>
       </div>
       <div class="hud-right">
         <button class="icon-btn" id="btn-abalone-cancel">↺</button>
+      </div>
+    </div>
+
+    <div class="abalone-trays">
+      <div class="abalone-tray-group">
+        <span class="abalone-tray-label">Noir sorties</span>
+        <svg id="abalone-tray-black" class="abalone-tray" viewBox="0 0 160 30"></svg>
+      </div>
+      <div class="abalone-tray-group">
+        <span class="abalone-tray-label">Blanc sorties</span>
+        <svg id="abalone-tray-white" class="abalone-tray" viewBox="0 0 160 30"></svg>
       </div>
     </div>
 

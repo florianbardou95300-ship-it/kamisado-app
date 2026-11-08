@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="abaloneBg" cx="50%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#3a2350"/>
+      <stop offset="55%" stop-color="#271739"/>
+      <stop offset="100%" stop-color="#160d22"/>
+    </radialGradient>
+    <radialGradient id="dohyoSand" cx="42%" cy="36%" r="70%">
+      <stop offset="0%" stop-color="#e8c07a"/>
+      <stop offset="60%" stop-color="#cb9a52"/>
+      <stop offset="100%" stop-color="#9c7138"/>
+    </radialGradient>
+    <linearGradient id="dohyoRope" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d8b06a"/>
+      <stop offset="50%" stop-color="#9c6a30"/>
+      <stop offset="100%" stop-color="#6b4620"/>
+    </linearGradient>
+    <radialGradient id="abaloneLogoBlack" cx="35%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#75757f"/>
+      <stop offset="28%" stop-color="#2c2c35"/>
+      <stop offset="70%" stop-color="#0c0c11"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="abaloneLogoWhite" cx="35%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#f6ecdb"/>
+      <stop offset="75%" stop-color="#dcccab"/>
+      <stop offset="100%" stop-color="#b8a98a"/>
+    </radialGradient>
+    <clipPath id="abaloneClip"><rect x="0" y="0" width="1024" height="1024" rx="220"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#abaloneClip)">
+    <rect width="1024" height="1024" fill="url(#abaloneBg)"/>
+
+    <!-- Dohyo : anneau de paille tressée (shimenawa) -->
+    <circle cx="512" cy="520" r="372" fill="none" stroke="url(#dohyoRope)" stroke-width="46"/>
+    <circle cx="512" cy="520" r="372" fill="none" stroke="#2a1708" stroke-width="46" stroke-dasharray="4 20" opacity="0.35"/>
+
+    <!-- Surface sablée -->
+    <circle cx="512" cy="520" r="340" fill="url(#dohyoSand)"/>
+    <circle cx="512" cy="520" r="340" fill="none" stroke="#7a5527" stroke-width="6" opacity="0.5"/>
+
+    <!-- Fusa : glands aux 4 points cardinaux du dohyo -->
+    <g opacity="0.92">
+      <circle cx="512" cy="148" r="22" fill="#5fb0e0"/>
+      <circle cx="512" cy="892" r="22" fill="#e04b4b"/>
+      <circle cx="140" cy="520" r="22" fill="#2b2b2b"/>
+      <circle cx="884" cy="520" r="22" fill="#e8e0c8"/>
+    </g>
+
+    <!-- Deux billes face à face, comme deux lutteurs au tachi-ai -->
+    <circle cx="512" cy="392" r="108" fill="url(#abaloneLogoBlack)"/>
+    <ellipse cx="474" cy="352" rx="30" ry="18" fill="#ffffff" opacity="0.75" transform="rotate(-35 474 352)"/>
+
+    <circle cx="512" cy="648" r="108" fill="url(#abaloneLogoWhite)"/>
+    <ellipse cx="474" cy="608" rx="30" ry="18" fill="#ffffff" opacity="0.85" transform="rotate(-35 474 608)"/>
+  </g>
+</svg>

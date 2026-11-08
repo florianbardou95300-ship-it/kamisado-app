@@ -1,57 +1,123 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ff7a4a"/>
-      <stop offset="45%" stop-color="#e8452a"/>
-      <stop offset="100%" stop-color="#a81f18"/>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d85a3c"/>
+      <stop offset="45%" stop-color="#b8362a"/>
+      <stop offset="100%" stop-color="#7a1f1c"/>
     </linearGradient>
-    <linearGradient id="metalDark" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="skinDark" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#3a1a18"/>
       <stop offset="100%" stop-color="#20100f"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2420"/>
+      <stop offset="100%" stop-color="#120e0c"/>
+    </linearGradient>
+    <linearGradient id="horn" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffdd9a"/>
+      <stop offset="55%" stop-color="#d79b34"/>
+      <stop offset="100%" stop-color="#8a5a16"/>
+    </linearGradient>
+    <radialGradient id="eyeGold" cx="50%" cy="45%" r="60%">
       <stop offset="0%" stop-color="#ffe3a0"/>
       <stop offset="100%" stop-color="#d79b34"/>
-    </linearGradient>
+    </radialGradient>
   </defs>
 
-  <!-- Cornes (kuwagata), en V, passent derrière le bol -->
-  <path d="M500,420
-           C 440,330 340,230 232,164
-           C 220,158 206,168 212,182
-           C 262,296 330,372 452,452
-           Z" fill="url(#metal)"/>
-  <path d="M524,420
-           C 584,330 684,230 792,164
-           C 804,158 818,168 812,182
-           C 762,296 694,372 572,452
-           Z" fill="url(#metal)"/>
+  <!-- Cordon et pompons -->
+  <path d="M296,586 C 240,660 210,760 206,884" fill="none" stroke="#161210" stroke-width="14" stroke-linecap="round"/>
+  <path d="M728,586 C 784,660 814,760 818,884" fill="none" stroke="#161210" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="204" cy="896" r="26" fill="url(#horn)"/>
+  <g stroke="#9c6a1c" stroke-width="5" stroke-linecap="round">
+    <line x1="186" y1="916" x2="180" y2="994"/>
+    <line x1="198" y1="920" x2="196" y2="1000"/>
+    <line x1="210" y1="920" x2="210" y2="1002"/>
+    <line x1="222" y1="918" x2="228" y2="998"/>
+  </g>
+  <circle cx="820" cy="896" r="26" fill="url(#horn)"/>
+  <g stroke="#9c6a1c" stroke-width="5" stroke-linecap="round">
+    <line x1="802" y1="916" x2="796" y2="994"/>
+    <line x1="814" y1="920" x2="812" y2="1000"/>
+    <line x1="826" y1="920" x2="826" y2="1002"/>
+    <line x1="838" y1="918" x2="844" y2="998"/>
+  </g>
 
-  <!-- Ailes latérales (fukigaeshi) -->
-  <path d="M292,470
-           C 232,500 192,560 182,654
-           C 178,688 206,706 234,688
-           C 300,646 352,588 392,520
-           Z" fill="url(#metalDark)"/>
-  <path d="M732,470
-           C 792,500 832,560 842,654
-           C 846,688 818,706 790,688
-           C 724,646 672,588 632,520
-           Z" fill="url(#metalDark)"/>
+  <!-- Oreilles -->
+  <path d="M292,560 C 238,562 198,608 194,666 C 192,694 212,704 230,684 C 258,652 278,608 298,574 Z" fill="url(#skinDark)"/>
+  <path d="M732,560 C 786,562 826,608 830,666 C 832,694 812,704 794,684 C 766,652 746,608 726,574 Z" fill="url(#skinDark)"/>
 
-  <!-- Bol du casque -->
-  <path d="M512,366
-           C 616,366 696,420 724,512
-           C 740,566 736,616 716,654
-           L 308,654
-           C 288,616 284,566 300,512
-           C 328,420 408,366 512,366
-           Z" fill="url(#metal)"/>
+  <!-- Cornes, recourbées -->
+  <path d="M398,330
+           C 340,246 300,170 288,96
+           C 285,80 302,70 314,82
+           C 390,154 440,226 470,310
+           Z" fill="url(#horn)"/>
+  <path d="M626,330
+           C 684,246 724,170 736,96
+           C 739,80 722,70 710,82
+           C 634,154 584,226 554,310
+           Z" fill="url(#horn)"/>
 
-  <!-- Bandeau bas du bol -->
-  <rect x="300" y="628" width="424" height="40" rx="10" fill="url(#metalDark)"/>
+  <!-- Bandeau de cheveux, derrière le haut du visage -->
+  <path d="M330,400
+           C 368,318 432,270 512,270
+           C 592,270 656,318 694,400
+           C 648,366 584,344 512,344
+           C 440,344 376,366 330,400
+           Z" fill="url(#hair)"/>
 
-  <!-- Emblème central (maedate) -->
-  <circle cx="512" cy="470" r="46" fill="url(#gold)"/>
-  <circle cx="512" cy="470" r="46" fill="none" stroke="#7a4a14" stroke-width="6"/>
+  <!-- Visage du masque -->
+  <path d="M512,310
+           C 640,310 742,380 766,468
+           C 782,532 772,598 738,656
+           C 714,722 622,826 512,826
+           C 402,826 310,722 286,656
+           C 252,598 242,532 258,468
+           C 282,380 384,310 512,310
+           Z" fill="url(#skin)"/>
+  <!-- Mouchetures (texture usée du bois peint) -->
+  <g opacity="0.2" fill="#1a0a08">
+    <circle cx="400" cy="360" r="14"/>
+    <circle cx="630" cy="350" r="10"/>
+    <circle cx="340" cy="520" r="12"/>
+    <circle cx="690" cy="540" r="16"/>
+    <circle cx="460" cy="700" r="10"/>
+    <circle cx="580" cy="710" r="13"/>
+  </g>
+
+  <!-- Sourcils, froncés et menaçants, en V vers le centre -->
+  <path d="M340,440 L 494,404 L 502,434 L 374,478 Z" fill="url(#skinDark)"/>
+  <path d="M684,440 L 530,404 L 522,434 L 650,478 Z" fill="url(#skinDark)"/>
+
+  <!-- Yeux, globuleux -->
+  <ellipse cx="408" cy="470" rx="54" ry="40" fill="#1b0f0c"/>
+  <circle cx="414" cy="470" r="26" fill="url(#eyeGold)"/>
+  <circle cx="414" cy="470" r="11" fill="#140b08"/>
+  <ellipse cx="616" cy="470" rx="54" ry="40" fill="#1b0f0c"/>
+  <circle cx="610" cy="470" r="26" fill="url(#eyeGold)"/>
+  <circle cx="610" cy="470" r="11" fill="#140b08"/>
+
+  <!-- Narines -->
+  <circle cx="478" cy="560" r="10" fill="url(#skinDark)"/>
+  <circle cx="546" cy="560" r="10" fill="url(#skinDark)"/>
+
+  <!-- Bouche ouverte, crocs et dents -->
+  <path d="M358,634
+           C 420,684 604,684 666,634
+           C 666,698 602,748 512,748
+           C 422,748 358,698 358,634
+           Z" fill="#160a08"/>
+  <g fill="url(#horn)">
+    <rect x="384" y="638" width="26" height="24" rx="4"/>
+    <rect x="416" y="648" width="26" height="24" rx="4"/>
+    <rect x="448" y="654" width="32" height="24" rx="4"/>
+    <rect x="496" y="656" width="32" height="24" rx="4"/>
+    <rect x="544" y="654" width="32" height="24" rx="4"/>
+    <rect x="582" y="648" width="26" height="24" rx="4"/>
+    <rect x="614" y="638" width="26" height="24" rx="4"/>
+  </g>
+  <path d="M398,642 L 420,594 L 442,642 Z" fill="url(#horn)"/>
+  <path d="M582,642 L 604,594 L 626,642 Z" fill="url(#horn)"/>
+  <path d="M352,628 C 326,650 324,682 342,708 C 348,670 360,644 380,624 Z" fill="url(#horn)"/>
+  <path d="M672,628 C 698,650 700,682 682,708 C 676,670 664,644 644,624 Z" fill="url(#horn)"/>
 </svg>

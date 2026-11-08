@@ -42,10 +42,45 @@ function hexToPixel(q, r) {
 
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
+const TRAY_SLOTS = 6;
+
+function buildTray(svgEl, fillUrl) {
+  svgEl.innerHTML = '';
+  const svgns = 'http://www.w3.org/2000/svg';
+  const spacing = 160 / TRAY_SLOTS;
+  for (let i = 0; i < TRAY_SLOTS; i++) {
+    const cx = spacing * i + spacing / 2;
+    const cy = 15;
+    const hole = document.createElementNS(svgns, 'circle');
+    hole.setAttribute('cx', cx);
+    hole.setAttribute('cy', cy);
+    hole.setAttribute('r', 10);
+    hole.setAttribute('class', 'abalone-tray-hole');
+    svgEl.appendChild(hole);
+
+    const marble = document.createElementNS(svgns, 'circle');
+    marble.setAttribute('cx', cx);
+    marble.setAttribute('cy', cy);
+    marble.setAttribute('r', 9.4);
+    marble.setAttribute('class', 'abalone-tray-marble');
+    marble.setAttribute('fill', fillUrl);
+    marble.setAttribute('visibility', 'hidden');
+    svgEl.appendChild(marble);
+  }
+}
+
+function renderTray(svgEl, count) {
+  const marbles = svgEl.querySelectorAll('.abalone-tray-marble');
+  marbles.forEach((m, i) => {
+    m.setAttribute('visibility', i < count ? 'visible' : 'hidden');
+  });
+}
+
 export function initAbalone() {
   const svg = document.getElementById('board-abalone');
   const hudTurn = document.getElementById('abalone-hud-turn');
-  const hudScore = document.getElementById('abalone-hud-score');
+  const trayBlack = document.getElementById('abalone-tray-black');
+  const trayWhite = document.getElementById('abalone-tray-white');
   const banner = document.getElementById('abalone-banner');
   const bannerText = document.getElementById('abalone-banner-text');
 
@@ -157,6 +192,9 @@ export function initAbalone() {
     svg.addEventListener('pointermove', onPointerMove);
     svg.addEventListener('pointerup', onPointerUp);
     svg.addEventListener('pointercancel', onPointerUp);
+
+    if (trayBlack) buildTray(trayBlack, 'url(#marbleBlack)');
+    if (trayWhite) buildTray(trayWhite, 'url(#marbleWhite)');
   }
 
   function renderBoardState() {
@@ -176,7 +214,8 @@ export function initAbalone() {
       }
     }
     hudTurn.textContent = `Au tour de : ${PLAYER_LABEL[state.turn]}`;
-    hudScore.textContent = `Sorties — Noir : ${state.score[BLACK]} · Blanc : ${state.score[WHITE]}`;
+    if (trayBlack) renderTray(trayBlack, state.score[BLACK]);
+    if (trayWhite) renderTray(trayWhite, state.score[WHITE]);
     if (state.winner) {
       banner.classList.remove('hidden');
       bannerText.textContent = `${PLAYER_LABEL[state.winner]} gagne ! (6 billes sorties)`;
