@@ -3,7 +3,8 @@
  * fichier audio externe. Pas de souci de droits, et ça ne pèse rien dans
  * l'APK.
  *
- * - playMoveSound() : un petit "tock" de bois quand une tour se déplace.
+ * - playMoveSound() : un souffle discret, façon vent dans des bambous,
+ *   quand une tour se déplace.
  * - musique d'ambiance : une nappe générative discrète, pentatonique,
  *   jouée en boucle pendant une partie (activable/désactivable).
  */
@@ -30,38 +31,48 @@ export function playMoveSound() {
   const ac = getCtx();
   if (!ac) return;
   const now = ac.currentTime;
+  const dur = 0.5 + Math.random() * 0.15;
 
-  // Bruit filtré très court : le "tock" du bois qui claque.
-  const bufferSize = Math.floor(ac.sampleRate * 0.08);
+  // Un souffle de bruit filtré, dont le filtre redescend doucement en
+  // fréquence — une petite rafale de vent qui s'éloigne.
+  const bufferSize = Math.floor(ac.sampleRate * dur);
   const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
   const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-  }
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
   const noise = ac.createBufferSource();
   noise.buffer = buffer;
+
   const bandpass = ac.createBiquadFilter();
   bandpass.type = 'bandpass';
-  bandpass.frequency.value = 950;
-  bandpass.Q.value = 1.1;
-  const noiseGain = ac.createGain();
-  noiseGain.gain.setValueAtTime(0.5, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-  noise.connect(bandpass).connect(noiseGain).connect(ac.destination);
-  noise.start(now);
-  noise.stop(now + 0.1);
+  bandpass.frequency.setValueAtTime(2100 + Math.random() * 500, now);
+  bandpass.frequency.exponentialRampToValueAtTime(420, now + dur);
+  bandpass.Q.value = 0.6;
 
-  // Composante tonale grave : un petit "pop" qui donne du corps au son.
-  const osc = ac.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(320, now);
-  osc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
-  const oscGain = ac.createGain();
-  oscGain.gain.setValueAtTime(0.22, now);
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-  osc.connect(oscGain).connect(ac.destination);
-  osc.start(now);
-  osc.stop(now + 0.13);
+  // Enveloppe douce : montée et descente progressives, jamais de clic sec.
+  const envelope = ac.createGain();
+  envelope.gain.setValueAtTime(0.0001, now);
+  envelope.gain.exponentialRampToValueAtTime(0.1, now + 0.16);
+  envelope.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+  // Léger frémissement (tremolo) pour évoquer le bruissement des feuilles.
+  const tremolo = ac.createOscillator();
+  tremolo.frequency.value = 6 + Math.random() * 4;
+  const tremoloDepth = ac.createGain();
+  tremoloDepth.gain.value = 0.35;
+  const tremoloCenter = ac.createConstantSource();
+  tremoloCenter.offset.value = 0.75;
+  const tremoloGain = ac.createGain();
+  tremolo.connect(tremoloDepth).connect(tremoloGain.gain);
+  tremoloCenter.connect(tremoloGain.gain);
+
+  noise.connect(bandpass).connect(envelope).connect(tremoloGain).connect(ac.destination);
+
+  noise.start(now);
+  noise.stop(now + dur + 0.05);
+  tremolo.start(now);
+  tremolo.stop(now + dur + 0.05);
+  tremoloCenter.start(now);
+  tremoloCenter.stop(now + dur + 0.05);
 }
 
 export function playWinSound() {
