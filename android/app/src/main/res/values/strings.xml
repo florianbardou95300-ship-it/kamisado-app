@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Kamisado</string>
-    <string name="title_activity_main">Kamisado</string>
-    <string name="package_name">com.badou.kamisado</string>
-    <string name="custom_url_scheme">com.badou.kamisado</string>
+    <string name="app_name">Samouraï Game</string>
+    <string name="title_activity_main">Samouraï Game</string>
+    <string name="package_name">com.badou.samouraigame</string>
+    <string name="custom_url_scheme">com.badou.samouraigame</string>
 </resources>

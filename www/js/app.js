@@ -8,8 +8,13 @@ import {
   playMoveSound, playWinSound, startMusic, stopMusic, isMusicPrefOn, setMusicPref,
 } from './audio.js';
 import { initUpdater } from './updater.js';
+import { initAbalone } from './abalone-ui.js';
 
 initUpdater();
+initAbalone();
+
+document.getElementById('btn-game-kamisado').addEventListener('click', () => showScreen('screen-menu'));
+document.getElementById('btn-game-abalone').addEventListener('click', () => showScreen('screen-abalone-menu'));
 
 const COLOR_LABEL = {
   orange: 'Orange', blue: 'Bleu', purple: 'Violet', pink: 'Rose',

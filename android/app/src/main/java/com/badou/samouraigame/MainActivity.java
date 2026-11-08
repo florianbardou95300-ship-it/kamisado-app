@@ -1,4 +1,4 @@
-package com.badou.kamisado;
+package com.badou.samouraigame;
 
 import com.getcapacitor.BridgeActivity;
 

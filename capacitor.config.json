@@ -1,6 +1,6 @@
 {
-  "appId": "com.badou.kamisado",
-  "appName": "Kamisado",
+  "appId": "com.badou.samouraigame",
+  "appName": "Samouraï Game",
   "webDir": "www",
   "plugins": {
     "CapacitorUpdater": {

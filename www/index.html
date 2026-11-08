@@ -3,13 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>Kamisado</title>
+<title>Samouraï Game</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<div id="screen-menu" class="screen active">
+<div id="screen-hub" class="screen active">
   <div class="menu-card">
+    <h1 class="title">Samouraï Game</h1>
+    <p class="subtitle">Choisis ton jeu</p>
+    <button class="btn btn-primary" id="btn-game-kamisado">Kamisado<br><span class="btn-sub">Le jeu des tours de couleur</span></button>
+    <button class="btn btn-primary" id="btn-game-abalone">Abalone<br><span class="btn-sub">Billes hexagonales, pousse l'adversaire hors du plateau</span></button>
+    <button class="btn btn-secondary hidden" id="btn-update">Mettre à jour</button>
+    <p id="update-status" class="status-text"></p>
+  </div>
+</div>
+
+<div id="screen-menu" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-hub">‹ Retour</button>
     <h1 class="title">Kamisado</h1>
     <p class="subtitle">Le jeu des tours de couleur</p>
 
@@ -17,8 +29,6 @@
     <button class="btn btn-primary" id="btn-online">Jouer en ligne<br><span class="btn-sub">2 joueurs, 2 téléphones</span></button>
     <button class="btn btn-primary" id="btn-ai">Jouer contre l'IA<br><span class="btn-sub">Solo, adversaire programmé</span></button>
     <button class="btn btn-ghost" id="btn-rules">Règles du jeu</button>
-    <button class="btn btn-secondary hidden" id="btn-update">Mettre à jour</button>
-    <p id="update-status" class="status-text"></p>
   </div>
 </div>
 
@@ -92,6 +102,52 @@
       <p><strong>La règle clé :</strong> après chaque coup, l'adversaire doit obligatoirement jouer la tour dont la couleur correspond à la case sur laquelle vous venez de poser la vôtre.</p>
       <p><strong>Blocage :</strong> si cette tour ne peut faire aucun mouvement, son propriétaire passe son tour. C'est de nouveau au joueur qui vient de jouer de continuer, avec la tour dont la couleur correspond à la case où se trouve la tour bloquée. Si cette tour de réponse est elle aussi bloquée, c'est un double blocage : le joueur qui vient de jouer perd la partie.</p>
       <p><strong>Premier coup :</strong> le premier joueur peut déplacer la tour de son choix.</p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-abalone-menu" class="screen">
+  <div class="menu-card">
+    <button class="back-btn" data-back="screen-hub">‹ Retour</button>
+    <h1 class="title">Abalone</h1>
+    <p class="subtitle">Pousse 6 billes adverses hors du plateau</p>
+    <button class="btn btn-primary" id="btn-abalone-local">Jouer en local<br><span class="btn-sub">2 joueurs, même téléphone</span></button>
+    <button class="btn btn-ghost" id="btn-abalone-rules">Règles du jeu</button>
+  </div>
+</div>
+
+<div id="screen-abalone-rules" class="screen">
+  <div class="menu-card rules-card">
+    <button class="back-btn" data-back="screen-abalone-menu">‹ Retour</button>
+    <h2 class="title-sm">Règles</h2>
+    <div class="rules-text">
+      <p><strong>But :</strong> être le premier à pousser 6 billes adverses hors du plateau.</p>
+      <p><strong>Déplacement :</strong> à chaque tour, déplace un groupe de 1, 2 ou 3 de tes billes, alignées et sans trou entre elles.</p>
+      <p><strong>En ligne :</strong> le groupe avance dans son propre alignement. Ça peut pousser des billes adverses, mais seulement si tu es strictement plus nombreux qu'elles sur cette ligne (2 contre 1, 3 contre 1 ou 2 — jamais à égalité).</p>
+      <p><strong>En éventail :</strong> le groupe se déplace d'une case sur le côté, en restant parallèle à lui-même. Seulement possible si toutes les cases d'arrivée sont vides.</p>
+      <p><strong>Sélection :</strong> touche une première bille, puis une bille adjacente alignée pour agrandir le groupe (jusqu'à 3). Les cases d'arrivée possibles s'illuminent ensuite — touche l'une d'elles pour jouer le coup.</p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-abalone-game" class="screen">
+  <div class="game-wrap">
+    <div class="hud">
+      <button class="icon-btn" id="btn-abalone-quit">‹</button>
+      <div class="hud-center">
+        <div id="abalone-hud-turn" class="hud-turn">—</div>
+        <div id="abalone-hud-score" class="hud-required"></div>
+      </div>
+      <div class="hud-right">
+        <button class="icon-btn" id="btn-abalone-cancel">↺</button>
+      </div>
+    </div>
+
+    <svg id="board-abalone" class="board-abalone" viewBox="0 0 100 100"></svg>
+
+    <div id="abalone-banner" class="banner hidden">
+      <div id="abalone-banner-text"></div>
+      <button class="btn btn-primary" id="btn-abalone-rematch">Rejouer</button>
     </div>
   </div>
 </div>

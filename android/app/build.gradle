@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.badou.kamisado"
+    namespace "com.badou.samouraigame"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.badou.kamisado"
+        applicationId "com.badou.samouraigame"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

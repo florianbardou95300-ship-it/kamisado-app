@@ -11,7 +11,7 @@
  */
 
 const REPO = 'florianbardou95300-ship-it/kamisado-app';
-const BUNDLE_ASSET_NAME = 'kamisado-web-bundle.zip';
+const BUNDLE_ASSET_NAME = 'samourai-web-bundle.zip';
 
 function getUpdaterPlugin() {
   return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater;

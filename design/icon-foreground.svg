@@ -1,41 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ff7a4a"/>
       <stop offset="45%" stop-color="#e8452a"/>
       <stop offset="100%" stop-color="#a81f18"/>
     </linearGradient>
-    <linearGradient id="woodDark" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="metalDark" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#3a1a18"/>
       <stop offset="100%" stop-color="#20100f"/>
     </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe3a0"/>
+      <stop offset="100%" stop-color="#d79b34"/>
+    </linearGradient>
   </defs>
 
-  <!-- Piliers (pleine hauteur, passent derrière les traverses) -->
-  <rect x="328" y="300" width="66" height="500" rx="6" fill="url(#wood)"/>
-  <rect x="630" y="300" width="66" height="500" rx="6" fill="url(#wood)"/>
+  <!-- Cornes (kuwagata), en V, passent derrière le bol -->
+  <path d="M500,420
+           C 440,330 340,230 232,164
+           C 220,158 206,168 212,182
+           C 262,296 330,372 452,452
+           Z" fill="url(#metal)"/>
+  <path d="M524,420
+           C 584,330 684,230 792,164
+           C 804,158 818,168 812,182
+           C 762,296 694,372 572,452
+           Z" fill="url(#metal)"/>
 
-  <!-- Socles -->
-  <rect x="312" y="788" width="98" height="34" rx="6" fill="url(#woodDark)"/>
-  <rect x="614" y="788" width="98" height="34" rx="6" fill="url(#woodDark)"/>
+  <!-- Ailes latérales (fukigaeshi) -->
+  <path d="M292,470
+           C 232,500 192,560 182,654
+           C 178,688 206,706 234,688
+           C 300,646 352,588 392,520
+           Z" fill="url(#metalDark)"/>
+  <path d="M732,470
+           C 792,500 832,560 842,654
+           C 846,688 818,706 790,688
+           C 724,646 672,588 632,520
+           Z" fill="url(#metalDark)"/>
 
-  <!-- Nuki : traverse basse, droite -->
-  <rect x="280" y="460" width="464" height="48" rx="8" fill="url(#wood)"/>
+  <!-- Bol du casque -->
+  <path d="M512,366
+           C 616,366 696,420 724,512
+           C 740,566 736,616 716,654
+           L 308,654
+           C 288,616 284,566 300,512
+           C 328,420 408,366 512,366
+           Z" fill="url(#metal)"/>
 
-  <!-- Gakuzuka : montant central -->
-  <rect x="497" y="364" width="30" height="100" fill="url(#wood)"/>
+  <!-- Bandeau bas du bol -->
+  <rect x="300" y="628" width="424" height="40" rx="10" fill="url(#metalDark)"/>
 
-  <!-- Kasagi : traverse haute -->
-  <rect x="230" y="306" width="564" height="58" rx="10" fill="url(#wood)"/>
-
-  <!-- Chapeau du kasagi, extrémités relevées -->
-  <path d="M212,322
-           C212,300 234,288 262,288
-           L762,288
-           C790,288 812,300 812,322
-           L812,344
-           C812,328 790,320 762,320
-           L262,320
-           C234,320 212,328 212,344
-           Z" fill="url(#woodDark)"/>
+  <!-- Emblème central (maedate) -->
+  <circle cx="512" cy="470" r="46" fill="url(#gold)"/>
+  <circle cx="512" cy="470" r="46" fill="none" stroke="#7a4a14" stroke-width="6"/>
 </svg>

@@ -15,7 +15,7 @@
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sans 0/O ni 1/I, pour éviter les confusions
 const CODE_LENGTH = 6;
-const PEERJS_ID_PREFIX = 'kamisado-';
+const PEERJS_ID_PREFIX = 'samourai-';
 
 function generateCode() {
   let code = '';
