@@ -75,6 +75,90 @@ export function playMoveSound() {
   tremoloCenter.stop(now + dur + 0.05);
 }
 
+/**
+ * Clic sec façon billes de verre/céramique qui s'entrechoquent, pour
+ * chaque coup joué à Abalone.
+ */
+export function playAbaloneMoveSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  const now = ac.currentTime;
+
+  // Quelques partiels non harmoniques, façon petit choc de verre/céramique.
+  const partials = [
+    { ratio: 1, gain: 0.16, decay: 0.09 },
+    { ratio: 2.76, gain: 0.1, decay: 0.07 },
+    { ratio: 4.4, gain: 0.05, decay: 0.05 },
+  ];
+  const base = 2000 + Math.random() * 500;
+  for (const p of partials) {
+    const osc = ac.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = base * p.ratio;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(p.gain, now);
+    gain.gain.exponentialRampToValueAtTime(0.0008, now + p.decay);
+    osc.connect(gain).connect(ac.destination);
+    osc.start(now);
+    osc.stop(now + p.decay + 0.02);
+  }
+
+  // Un tout petit "clac" de bruit à l'attaque pour la texture du choc.
+  const clickDur = 0.02;
+  const bufferSize = Math.floor(ac.sampleRate * clickDur);
+  const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  const noise = ac.createBufferSource();
+  noise.buffer = buffer;
+  const hp = ac.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 3000;
+  const noiseGain = ac.createGain();
+  noiseGain.gain.value = 0.12;
+  noise.connect(hp).connect(noiseGain).connect(ac.destination);
+  noise.start(now);
+}
+
+/**
+ * Son marquant la sortie d'une bille du plateau à Abalone : une petite
+ * chute, avec un dernier "tac" plus grave qui évoque la bille tombant
+ * hors du jeu.
+ */
+export function playAbaloneCaptureSound() {
+  const ac = getCtx();
+  if (!ac) return;
+  const now = ac.currentTime;
+
+  // D'abord le choc initial (comme un coup normal, mais un peu plus fort).
+  playAbaloneMoveSound();
+
+  // Puis une glissade descendante qui évoque la chute...
+  const fall = ac.createOscillator();
+  fall.type = 'sine';
+  fall.frequency.setValueAtTime(900, now + 0.03);
+  fall.frequency.exponentialRampToValueAtTime(140, now + 0.26);
+  const fallGain = ac.createGain();
+  fallGain.gain.setValueAtTime(0.0001, now + 0.03);
+  fallGain.gain.exponentialRampToValueAtTime(0.14, now + 0.08);
+  fallGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.28);
+  fall.connect(fallGain).connect(ac.destination);
+  fall.start(now + 0.03);
+  fall.stop(now + 0.3);
+
+  // ...et un petit "tac" grave final, l'atterrissage.
+  const thud = ac.createOscillator();
+  thud.type = 'triangle';
+  thud.frequency.value = 95;
+  const thudGain = ac.createGain();
+  thudGain.gain.setValueAtTime(0.0001, now + 0.27);
+  thudGain.gain.exponentialRampToValueAtTime(0.22, now + 0.29);
+  thudGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.4);
+  thud.connect(thudGain).connect(ac.destination);
+  thud.start(now + 0.27);
+  thud.stop(now + 0.42);
+}
+
 export function playWinSound() {
   const ac = getCtx();
   if (!ac) return;

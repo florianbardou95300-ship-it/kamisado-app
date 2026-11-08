@@ -232,20 +232,28 @@ html, body {
   border-radius: 14px;
   background: radial-gradient(ellipse at 50% 30%, #4a3468 0%, #271739 55%, #160d22 100%);
   box-shadow: 0 20px 50px -20px rgba(0,0,0,0.7), 0 0 0 6px rgba(0,0,0,0.35);
-  touch-action: manipulation;
+  touch-action: none;
+  user-select: none;
 }
 .abalone-hole {
   fill: rgba(0,0,0,0.35);
   stroke: rgba(0,0,0,0.5);
   stroke-width: 0.6;
 }
-.abalone-highlight {
-  stroke-width: 1;
-  transition: stroke 0.1s ease;
+.abalone-selection {
+  stroke-opacity: 0.6;
+  transition: stroke 0.12s ease;
+  pointer-events: none;
 }
 .abalone-marble {
-  stroke-width: 0.8;
-  filter: drop-shadow(0 1.5px 1.5px rgba(0,0,0,0.5));
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 0.5;
+  filter: drop-shadow(0 1.6px 1.8px rgba(0,0,0,0.55));
+}
+.abalone-glint {
+  fill: #ffffff;
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 .cell.highlight::after {
