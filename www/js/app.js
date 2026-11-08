@@ -256,7 +256,6 @@ document.getElementById('btn-ai-difficile').addEventListener('click', () => star
 
 // ---------- Mode en ligne : hôte ----------
 const hostOfferCode = document.getElementById('host-offer-code');
-const hostAnswerInput = document.getElementById('host-answer-input');
 const hostStatus = document.getElementById('host-status');
 
 document.getElementById('btn-host').addEventListener('click', async () => {
@@ -276,41 +275,37 @@ document.getElementById('btn-host').addEventListener('click', async () => {
     hostStatus.textContent = 'Connexion perdue.';
   };
   net.onMessage = (msg) => handleNetMessage(msg);
+  net.onError = (message) => { hostStatus.textContent = message; };
 
-  hostOfferCode.value = 'Génération du code…';
-  const code = await net.createOffer();
-  hostOfferCode.value = code;
-});
-
-document.getElementById('btn-share-offer').addEventListener('click', () => shareOrCopy(hostOfferCode.value));
-
-document.getElementById('btn-connect-host').addEventListener('click', async () => {
-  const code = hostAnswerInput.value.trim();
-  if (!code) return;
+  hostOfferCode.textContent = 'Génération du code…';
   try {
-    hostStatus.textContent = 'Connexion en cours…';
-    await net.acceptAnswer(code);
+    const code = await net.hostGame();
+    hostOfferCode.textContent = code;
+    hostStatus.textContent = "En attente de l'autre joueur…";
   } catch (e) {
-    hostStatus.textContent = 'Code invalide. Vérifie le copier-coller.';
+    hostOfferCode.textContent = '—';
+    hostStatus.textContent = 'Impossible de créer la partie. Vérifie ta connexion internet et réessaie.';
   }
 });
 
+document.getElementById('btn-share-offer').addEventListener('click', () => shareOrCopy(hostOfferCode.textContent));
+
 // ---------- Mode en ligne : invité ----------
 const joinOfferInput = document.getElementById('join-offer-input');
-const joinAnswerCode = document.getElementById('join-answer-code');
 const joinStatus = document.getElementById('join-status');
 
 document.getElementById('btn-join').addEventListener('click', () => {
   document.getElementById('online-choice').classList.add('hidden');
   document.getElementById('join-panel').classList.remove('hidden');
+  joinOfferInput.value = '';
   joinStatus.textContent = '';
   myOwner = TOP; // l'invité joue en haut
 });
 
-document.getElementById('btn-generate-answer').addEventListener('click', async () => {
+document.getElementById('btn-join-code').addEventListener('click', async () => {
   const code = joinOfferInput.value.trim();
   if (!code) return;
-  joinStatus.textContent = 'Génération de la réponse…';
+  joinStatus.textContent = 'Connexion en cours…';
 
   net = new P2PConnection();
   net.onOpen = () => {
@@ -321,18 +316,14 @@ document.getElementById('btn-generate-answer').addEventListener('click', async (
     joinStatus.textContent = 'Connexion perdue.';
   };
   net.onMessage = (msg) => handleNetMessage(msg);
+  net.onError = (message) => { joinStatus.textContent = message; };
 
   try {
-    const answer = await net.createAnswer(code);
-    joinAnswerCode.value = answer;
-    document.getElementById('btn-share-answer').classList.remove('hidden');
-    joinStatus.textContent = 'Envoie ce code à ton adversaire, puis attends.';
+    await net.joinGame(code);
   } catch (e) {
-    joinStatus.textContent = 'Code invalide. Vérifie le copier-coller.';
+    // le message lisible est déjà posé par onError ci-dessus
   }
 });
-
-document.getElementById('btn-share-answer').addEventListener('click', () => shareOrCopy(joinAnswerCode.value));
 
 function handleNetMessage(msg) {
   if (msg.type === 'hello') {

@@ -1,106 +1,120 @@
 /**
- * Connexion pair-à-pair sans serveur : signalisation manuelle (copier/coller
- * ou partage) d'un code contenant l'offre/réponse SDP une fois la collecte
- * ICE terminée ("vanilla ICE", pas de trickle). Aucun compte, aucun backend.
+ * Connexion pair-à-pair pour le mode en ligne, via un code court (6
+ * caractères) au lieu d'un gros bloc de texte à copier-coller.
+ *
+ * Techniquement, ça reste du WebRTC pair-à-pair pour la partie elle-même
+ * (aucune donnée de jeu ne transite par un serveur) : seul le tout petit
+ * "qui es-tu, où es-tu" initial passe par le serveur de signalisation
+ * public et gratuit de PeerJS (0.peerjs.com), le temps d'établir la
+ * connexion directe entre les deux téléphones. C'est le même principe
+ * que "créer une salle" dans la plupart des jeux en ligne simples.
+ *
+ * Nécessite une connexion internet au moment de la mise en relation (pas
+ * ensuite, pendant la partie — sauf si l'un des deux change de réseau).
  */
 
-const ICE_SERVERS = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' },
-];
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sans 0/O ni 1/I, pour éviter les confusions
+const CODE_LENGTH = 6;
+const PEERJS_ID_PREFIX = 'kamisado-';
 
-function waitForIceGatheringComplete(pc) {
-  if (pc.iceGatheringState === 'complete') return Promise.resolve();
-  return new Promise((resolve) => {
-    function check() {
-      if (pc.iceGatheringState === 'complete') {
-        pc.removeEventListener('icegatheringstatechange', check);
-        resolve();
-      }
-    }
-    pc.addEventListener('icegatheringstatechange', check);
-  });
-}
-
-function encode(desc) {
-  const json = JSON.stringify({ type: desc.type, sdp: desc.sdp });
-  return btoa(unescape(encodeURIComponent(json)));
-}
-
-function decode(code) {
-  const json = decodeURIComponent(escape(atob(code.trim())));
-  return JSON.parse(json);
+function generateCode() {
+  let code = '';
+  for (let i = 0; i < CODE_LENGTH; i++) {
+    code += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  }
+  return code;
 }
 
 export class P2PConnection {
   constructor() {
-    this.pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-    this.channel = null;
-    this.onMessage = null;
+    this.peer = null;
+    this.conn = null;
     this.onOpen = null;
     this.onClose = null;
-    this.pc.addEventListener('connectionstatechange', () => {
-      if (['disconnected', 'failed', 'closed'].includes(this.pc.connectionState)) {
-        this.onClose && this.onClose(this.pc.connectionState);
-      }
-    });
+    this.onMessage = null;
+    this.onError = null; // (message lisible) appelé sur échec de connexion
   }
 
-  _wireChannel(ch) {
-    this.channel = ch;
-    ch.addEventListener('open', () => this.onOpen && this.onOpen());
-    ch.addEventListener('close', () => this.onClose && this.onClose('channel-closed'));
-    ch.addEventListener('message', (e) => {
+  _wireConnection(conn) {
+    this.conn = conn;
+    conn.on('open', () => this.onOpen && this.onOpen());
+    conn.on('close', () => this.onClose && this.onClose('closed'));
+    conn.on('error', () => this.onClose && this.onClose('error'));
+    conn.on('data', (data) => {
       try {
-        const msg = JSON.parse(e.data);
+        const msg = typeof data === 'string' ? JSON.parse(data) : data;
         this.onMessage && this.onMessage(msg);
-      } catch (err) {
-        /* ignore malformed */
-      }
+      } catch (e) { /* ignore message mal formé */ }
     });
   }
 
-  /** Côté hôte : crée l'offre. Retourne le code à transmettre. */
-  async createOffer() {
-    const ch = this.pc.createDataChannel('game');
-    this._wireChannel(ch);
-    const offer = await this.pc.createOffer();
-    await this.pc.setLocalDescription(offer);
-    await waitForIceGatheringComplete(this.pc);
-    return encode(this.pc.localDescription);
+  /**
+   * Crée une partie et retourne le code court à communiquer à l'autre
+   * joueur. Se résout dès que le code est prêt (pas encore connecté —
+   * `onOpen` sera appelé plus tard, quand l'autre joueur aura rejoint).
+   */
+  hostGame() {
+    return new Promise((resolve, reject) => {
+      const code = generateCode();
+      const peer = new window.Peer(PEERJS_ID_PREFIX + code);
+      this.peer = peer;
+
+      peer.on('open', () => resolve(code));
+      peer.on('connection', (conn) => this._wireConnection(conn));
+      peer.on('error', (err) => {
+        if (err && err.type === 'unavailable-id') {
+          // Collision extrêmement improbable sur l'ID choisi : on retente.
+          peer.destroy();
+          this.hostGame().then(resolve, reject);
+          return;
+        }
+        reject(err);
+        this.onError && this.onError(readableError(err));
+      });
+      peer.on('disconnected', () => this.onClose && this.onClose('disconnected'));
+    });
   }
 
-  /** Côté hôte : une fois reçu le code de réponse de l'invité. */
-  async acceptAnswer(code) {
-    const desc = decode(code);
-    await this.pc.setRemoteDescription(desc);
-  }
+  /** Rejoint une partie à partir du code donné par l'hôte. */
+  joinGame(code) {
+    return new Promise((resolve, reject) => {
+      const peer = new window.Peer();
+      this.peer = peer;
+      let settled = false;
 
-  /** Côté invité : à partir du code de l'hôte, retourne le code de réponse. */
-  async createAnswer(offerCode) {
-    const offer = decode(offerCode);
-    const readyChannel = new Promise((resolve) => {
-      this.pc.addEventListener('datachannel', (e) => {
-        this._wireChannel(e.channel);
-        resolve();
+      peer.on('open', () => {
+        const conn = peer.connect(PEERJS_ID_PREFIX + code.trim().toUpperCase(), { reliable: true });
+        this._wireConnection(conn);
+        conn.on('open', () => {
+          if (!settled) { settled = true; resolve(); }
+        });
+        conn.on('error', (err) => {
+          if (!settled) { settled = true; reject(err); this.onError && this.onError(readableError(err)); }
+        });
+      });
+      peer.on('error', (err) => {
+        if (!settled) { settled = true; reject(err); this.onError && this.onError(readableError(err)); }
       });
     });
-    await this.pc.setRemoteDescription(offer);
-    const answer = await this.pc.createAnswer();
-    await this.pc.setLocalDescription(answer);
-    await waitForIceGatheringComplete(this.pc);
-    await readyChannel;
-    return encode(this.pc.localDescription);
   }
 
   send(msg) {
-    if (this.channel && this.channel.readyState === 'open') {
-      this.channel.send(JSON.stringify(msg));
+    if (this.conn && this.conn.open) {
+      this.conn.send(JSON.stringify(msg));
     }
   }
 
   close() {
-    try { this.channel && this.channel.close(); } catch (e) {}
-    try { this.pc.close(); } catch (e) {}
+    try { this.conn && this.conn.close(); } catch (e) { /* ignore */ }
+    try { this.peer && this.peer.destroy(); } catch (e) { /* ignore */ }
   }
+}
+
+function readableError(err) {
+  const type = err && err.type;
+  if (type === 'peer-unavailable') return "Code introuvable. Vérifie qu'il est bien saisi et que l'autre joueur a bien créé la partie.";
+  if (type === 'network' || type === 'server-error' || type === 'socket-error' || type === 'socket-closed') {
+    return 'Connexion impossible — vérifie ta connexion internet et réessaie.';
+  }
+  return 'Connexion impossible. Réessaie.';
 }

@@ -31,24 +31,16 @@
     </div>
 
     <div id="host-panel" class="hidden panel">
-      <p class="step-label">1. Envoie ce code à ton adversaire</p>
-      <textarea id="host-offer-code" class="code-box" readonly placeholder="Génération du code…"></textarea>
+      <p class="step-label">Donne ce code à ton adversaire</p>
+      <div id="host-offer-code" class="code-box code-box-display" aria-live="polite">…</div>
       <button class="btn btn-secondary" id="btn-share-offer">Partager / Copier le code</button>
-
-      <p class="step-label">2. Colle ici le code de réponse qu'il t'envoie</p>
-      <textarea id="host-answer-input" class="code-box" placeholder="Colle le code de réponse ici…"></textarea>
-      <button class="btn btn-primary" id="btn-connect-host">Se connecter</button>
       <p id="host-status" class="status-text"></p>
     </div>
 
     <div id="join-panel" class="hidden panel">
-      <p class="step-label">1. Colle ici le code reçu de l'hôte</p>
-      <textarea id="join-offer-input" class="code-box" placeholder="Colle le code de l'hôte ici…"></textarea>
-      <button class="btn btn-primary" id="btn-generate-answer">Générer ma réponse</button>
-
-      <p class="step-label">2. Envoie ce code de réponse à l'hôte</p>
-      <textarea id="join-answer-code" class="code-box" readonly placeholder="…"></textarea>
-      <button class="btn btn-secondary hidden" id="btn-share-answer">Partager / Copier le code</button>
+      <p class="step-label">Entre le code donné par l'hôte</p>
+      <input id="join-offer-input" class="code-box code-box-input" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="15" placeholder="Ex. AB12CD" />
+      <button class="btn btn-primary" id="btn-join-code">Rejoindre</button>
       <p id="join-status" class="status-text"></p>
     </div>
   </div>
@@ -102,6 +94,7 @@
   </div>
 </div>
 
+<script src="js/vendor/peerjs.min.js"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

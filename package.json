@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
-    "@capacitor/core": "^6.1.2"
+    "@capacitor/core": "^6.1.2",
+    "peerjs": "^1.5.5"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",
