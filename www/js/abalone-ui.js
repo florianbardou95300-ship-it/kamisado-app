@@ -166,12 +166,22 @@ export function initAbalone() {
   let state = null;
   let selected = []; // [{q,r}, ...] dans l'ordre de sélection
   let currentMoves = []; // coups légaux pour `selected`, recalculés à chaque changement
-  let phase = 'idle'; // 'idle' | 'selecting' | 'moving'
+  let phase = 'idle'; // 'idle' | 'selecting' | 'arming' | 'moving'
   let dragStart = null;
   let aimedMove = null;
   let capsuleEl = null;
   let boardGroupEl = null;
   let moveAnimating = false;
+  let armTimer = null;
+  let lastDragPoint = null;
+  // Petit temps de latence entre "sélectionner la ligne" et "viser une
+  // direction" : évite qu'un seul geste continu du doigt déclenche un
+  // déplacement non voulu juste après avoir fini de sélectionner.
+  const MOVE_ARM_DELAY_MS = 160;
+
+  function clearArmTimer() {
+    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+  }
 
   let palette = loadPalettePref();
   function currentPalette() { return MARBLE_PALETTES[palette] || MARBLE_PALETTES['black-white']; }
@@ -398,6 +408,7 @@ export function initAbalone() {
   }
 
   function clearSelection() {
+    clearArmTimer();
     selected = [];
     currentMoves = [];
     phase = 'idle';
@@ -406,6 +417,7 @@ export function initAbalone() {
   }
 
   function finishGesture(executed) {
+    clearArmTimer();
     if (!executed) {
       resetGroupOffset();
       renderCapsule(null, null);
@@ -537,6 +549,7 @@ export function initAbalone() {
     const downCell = nearestCell(p);
     if (!downCell) return;
     svg.setPointerCapture(e.pointerId);
+    clearArmTimer();
 
     if (selected.length > 0 && containsCell(selected, downCell)) {
       phase = 'moving';
@@ -571,8 +584,31 @@ export function initAbalone() {
       }
       const lastCenter = pixelOf(selected[selected.length - 1]);
       if (dist(p, lastCenter) > MIN_DRAG) {
-        phase = 'moving';
-        dragStart = p;
+        // On ne bascule pas tout de suite en visée de direction : un court
+        // temps de latence doit s'écouler pour que "finir de sélectionner"
+        // et "viser un déplacement" restent deux gestes bien distincts.
+        phase = 'arming';
+        lastDragPoint = p;
+        clearArmTimer();
+        armTimer = setTimeout(() => {
+          armTimer = null;
+          if (phase === 'arming') {
+            phase = 'moving';
+            dragStart = lastDragPoint;
+          }
+        }, MOVE_ARM_DELAY_MS);
+      }
+      return;
+    }
+
+    if (phase === 'arming') {
+      lastDragPoint = p;
+      const lastCenter = pixelOf(selected[selected.length - 1]);
+      if (dist(p, lastCenter) <= MIN_DRAG) {
+        // Le doigt est revenu près de la ligne sélectionnée : on annule
+        // l'armement, l'utilisateur n'a pas encore décidé de bouger.
+        clearArmTimer();
+        phase = 'selecting';
       }
       return;
     }
