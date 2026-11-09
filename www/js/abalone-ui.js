@@ -17,9 +17,12 @@
  */
 import {
   BLACK, WHITE, DIRECTIONS, createInitialState, allCells, ownerAt,
-  validateGroup, legalMovesForGroup, applyGroupMove,
+  validateGroup, legalMovesForGroup, applyGroupMove, neighbor, inBounds,
 } from './abalone.js';
-import { playAbaloneMoveSound, playAbaloneCaptureSound } from './audio.js';
+import {
+  playAbaloneMoveSound, playAbaloneCaptureSound,
+  startMusic, stopMusic, isMusicPrefOn, setMusicPref,
+} from './audio.js';
 import { chooseAbaloneAiMove } from './abalone-ai.js';
 import { P2PConnection } from './webrtc.js';
 
@@ -167,6 +170,8 @@ export function initAbalone() {
   let dragStart = null;
   let aimedMove = null;
   let capsuleEl = null;
+  let boardGroupEl = null;
+  let moveAnimating = false;
 
   let palette = loadPalettePref();
   function currentPalette() { return MARBLE_PALETTES[palette] || MARBLE_PALETTES['black-white']; }
@@ -256,6 +261,7 @@ export function initAbalone() {
     boardGroup.setAttribute('id', 'abalone-board-group');
     if (isFlipped()) boardGroup.setAttribute('transform', 'rotate(180)');
     svg.appendChild(boardGroup);
+    boardGroupEl = boardGroup;
     for (const c of cells) {
       const p = pixelOf(c);
       const g = document.createElementNS(svgns, 'g');
@@ -409,16 +415,77 @@ export function initAbalone() {
     aimedMove = null;
   }
 
+  const ABALONE_ANIMATE_MS = 340;
+
+  /**
+   * Fait glisser visuellement les billes du groupe déplacé (et, en cas de
+   * capture, les billes adverses poussées — la dernière continuant hors
+   * du plateau en s'estompant) avant d'appliquer le coup, pour que le
+   * déplacement — humain, IA, ou reçu en ligne — soit toujours visible.
+   */
+  function animateAbaloneMove(ordered, move, onDone) {
+    if (!boardGroupEl) { onDone(); return; }
+    const dv = dirPixel[move.dirIndex];
+    const steps = ordered.map((c) => ({ cell: c, dropOff: false }));
+    (move.pushedCells || []).forEach((c) => {
+      const n = neighbor(c.q, c.r, move.dirIndex);
+      steps.push({ cell: c, dropOff: !inBounds(n.q, n.r) });
+    });
+
+    const svgns = 'http://www.w3.org/2000/svg';
+    const ghosts = [];
+    steps.forEach(({ cell, dropOff }) => {
+      const src = cellEl(cell.q, cell.r);
+      const marbleEl = src ? src.querySelector('.abalone-marble') : null;
+      if (!marbleEl || marbleEl.getAttribute('visibility') !== 'visible') return;
+      const glintEl = src.querySelector('.abalone-glint');
+      const start = pixelOf(cell);
+
+      const ghost = document.createElementNS(svgns, 'g');
+      ghost.setAttribute('transform', `translate(${start.x},${start.y})`);
+      ghost.style.pointerEvents = 'none';
+      const mClone = marbleEl.cloneNode(true);
+      mClone.removeAttribute('visibility');
+      ghost.appendChild(mClone);
+      if (glintEl && glintEl.getAttribute('visibility') === 'visible') {
+        const gClone = glintEl.cloneNode(true);
+        gClone.removeAttribute('visibility');
+        ghost.appendChild(gClone);
+      }
+      boardGroupEl.appendChild(ghost);
+      marbleEl.setAttribute('visibility', 'hidden');
+      if (glintEl) glintEl.setAttribute('visibility', 'hidden');
+      ghosts.push({ ghost, start, dropOff });
+    });
+
+    if (!ghosts.length) { onDone(); return; }
+
+    const startTime = performance.now();
+    function tick(now) {
+      const t = Math.min(1, (now - startTime) / ABALONE_ANIMATE_MS);
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      ghosts.forEach(({ ghost, start, dropOff }) => {
+        const factor = dropOff ? 1.7 : 1; // continue un peu plus loin : effet de chute hors du plateau
+        const x = start.x + dv.x * factor * ease;
+        const y = start.y + dv.y * factor * ease;
+        ghost.setAttribute('transform', `translate(${x},${y})`);
+        if (dropOff) ghost.style.opacity = String(1 - ease);
+      });
+      if (t < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        ghosts.forEach(({ ghost }) => ghost.remove());
+        onDone();
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
   function executeMove(picked, fromRemote) {
     const capture = picked.move.capture;
     const mover = state.turn;
-    state = applyGroupMove(state, picked.ordered, picked.move, mover);
-    selected = [];
-    currentMoves = [];
-    renderBoardState();
-    renderCapsule(null, null);
-    if (capture) playAbaloneCaptureSound(); else playAbaloneMoveSound();
-
+    // Envoyé tout de suite (avant l'animation locale) pour que l'adversaire,
+    // en ligne, voie le coup glisser sans attendre notre propre animation.
     if (mode === 'online' && !fromRemote && net) {
       net.send({
         type: 'move',
@@ -426,7 +493,17 @@ export function initAbalone() {
         dirIndex: picked.move.dirIndex,
       });
     }
-    if (!fromRemote) maybeScheduleAiMove();
+    moveAnimating = true;
+    animateAbaloneMove(picked.ordered, picked.move, () => {
+      moveAnimating = false;
+      state = applyGroupMove(state, picked.ordered, picked.move, mover);
+      selected = [];
+      currentMoves = [];
+      renderBoardState();
+      renderCapsule(null, null);
+      if (capture) playAbaloneCaptureSound(); else playAbaloneMoveSound();
+      if (!fromRemote) maybeScheduleAiMove();
+    });
   }
 
   /** En mode IA, si c'est au tour de la machine, calcule et joue son coup. */
@@ -448,7 +525,7 @@ export function initAbalone() {
   }
 
   function canInteract() {
-    if (!state || state.winner || aiThinking) return false;
+    if (!state || state.winner || aiThinking || moveAnimating) return false;
     if (mode === 'ai') return state.turn === humanOwner;
     if (mode === 'online') return state.turn === myOwner;
     return true;
@@ -530,6 +607,7 @@ export function initAbalone() {
     mode = newMode;
     matchToken++;
     aiThinking = false;
+    moveAnimating = false;
     state = createInitialState();
     selected = []; currentMoves = []; phase = 'idle'; aimedMove = null;
     if (hudConn) hudConn.textContent = mode === 'online' ? '🌐' : mode === 'ai' ? '🤖' : '';
@@ -537,6 +615,7 @@ export function initAbalone() {
     buildBoard();
     renderBoardState();
     showScreen('screen-abalone-game');
+    if (isMusicPrefOn()) startMusic();
     maybeScheduleAiMove();
   }
 
@@ -556,6 +635,7 @@ export function initAbalone() {
     } else if (msg.type === 'rematch') {
       matchToken++;
       aiThinking = false;
+      moveAnimating = false;
       state = createInitialState();
       clearSelection();
       renderBoardState();
@@ -597,6 +677,7 @@ export function initAbalone() {
     if (mode === 'ai') humanOwner = Math.random() < 0.5 ? BLACK : WHITE;
     matchToken++;
     aiThinking = false;
+    moveAnimating = false;
     state = createInitialState();
     clearSelection();
     buildBoard();
@@ -607,9 +688,26 @@ export function initAbalone() {
   document.getElementById('btn-abalone-quit').addEventListener('click', () => {
     matchToken++;
     aiThinking = false;
+    moveAnimating = false;
     if (net) { net.close(); net = null; }
+    stopMusic();
     showScreen('screen-abalone-menu');
   });
+
+  // ---------- Musique d'ambiance (préférence partagée avec Kamisado) ----------
+  const btnAbaloneMusic = document.getElementById('btn-abalone-music');
+  function updateAbaloneMusicButton() {
+    if (btnAbaloneMusic) btnAbaloneMusic.textContent = isMusicPrefOn() ? '🔊' : '🔇';
+  }
+  updateAbaloneMusicButton();
+  if (btnAbaloneMusic) {
+    btnAbaloneMusic.addEventListener('click', () => {
+      const next = !isMusicPrefOn();
+      setMusicPref(next);
+      updateAbaloneMusicButton();
+      if (next) startMusic(); else stopMusic();
+    });
+  }
 
   // ---------- Mode IA ----------
   document.getElementById('btn-abalone-ai').addEventListener('click', () => showScreen('screen-abalone-ai-setup'));
@@ -705,6 +803,7 @@ export function initAbalone() {
     btn.addEventListener('click', () => {
       matchToken++;
       aiThinking = false;
+      moveAnimating = false;
       if (net) { net.close(); net = null; }
       document.getElementById('abalone-online-choice').classList.remove('hidden');
       document.getElementById('abalone-host-panel').classList.add('hidden');

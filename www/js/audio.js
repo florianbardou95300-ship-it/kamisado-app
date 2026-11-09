@@ -194,7 +194,7 @@ function scheduleNote(ac, time, freq, dur) {
   osc.frequency.value = freq;
   const gain = ac.createGain();
   gain.gain.setValueAtTime(0, time);
-  gain.gain.linearRampToValueAtTime(0.05, time + 0.5);
+  gain.gain.linearRampToValueAtTime(0.1, time + 0.5);
   gain.gain.linearRampToValueAtTime(0, time + dur);
   osc.connect(gain).connect(ac.destination);
   osc.start(time);
