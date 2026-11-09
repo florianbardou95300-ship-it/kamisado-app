@@ -299,6 +299,7 @@ html, body {
 .hud-conn-icon { font-size: 18px; width: 38px; text-align: center; }
 
 .board {
+  position: relative;
   width: min(94vw, 460px);
   height: min(94vw, 460px);
   display: grid;

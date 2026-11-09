@@ -183,8 +183,73 @@ function showBanner(finalState) {
   banner.classList.remove('hidden');
 }
 
+const MOVE_ANIMATE_MS = 380;
+let animating = false;
+
+/** Index DOM (ordre d'affichage, qui tient compte du retournement) d'une case logique r,c. */
+function boardCellIndex(r, c) {
+  const flipped = isFlipped();
+  const dr = flipped ? 7 - r : r;
+  const dc = flipped ? 7 - c : c;
+  return dr * 8 + dc;
+}
+
+/**
+ * Fait glisser visuellement la tour de (fromR,fromC) vers (toR,toC) avant
+ * d'appliquer le coup, pour que le déplacement — humain, IA, ou reçu en
+ * ligne — soit toujours visible plutôt qu'instantané.
+ */
+function animateTowerMove(fromR, fromC, toR, toC, onDone) {
+  const fromCell = boardEl.children[boardCellIndex(fromR, fromC)];
+  const toCell = boardEl.children[boardCellIndex(toR, toC)];
+  const towerEl = fromCell ? fromCell.querySelector('.tower') : null;
+  if (!towerEl || !toCell) { onDone(); return; }
+
+  const boardRect = boardEl.getBoundingClientRect();
+  const towerRect = towerEl.getBoundingClientRect();
+  const toRect = toCell.getBoundingClientRect();
+
+  const startLeft = towerRect.left - boardRect.left;
+  const startTop = towerRect.top - boardRect.top;
+  const endLeft = (toRect.left + toRect.width / 2) - boardRect.left - towerRect.width / 2;
+  const endTop = (toRect.top + toRect.height / 2) - boardRect.top - towerRect.height / 2;
+
+  const ghost = towerEl.cloneNode(true);
+  ghost.classList.remove('selected');
+  ghost.style.position = 'absolute';
+  ghost.style.left = `${startLeft}px`;
+  ghost.style.top = `${startTop}px`;
+  ghost.style.width = `${towerRect.width}px`;
+  ghost.style.height = `${towerRect.height}px`;
+  ghost.style.margin = '0';
+  ghost.style.transition = `left ${MOVE_ANIMATE_MS}ms ease, top ${MOVE_ANIMATE_MS}ms ease`;
+  ghost.style.zIndex = '30';
+  ghost.style.pointerEvents = 'none';
+
+  towerEl.style.visibility = 'hidden';
+  boardEl.appendChild(ghost);
+  // Force un reflow pour que la position de départ soit bien prise en compte
+  // avant de déclencher la transition vers la position d'arrivée.
+  // eslint-disable-next-line no-unused-expressions
+  ghost.getBoundingClientRect();
+  requestAnimationFrame(() => {
+    ghost.style.left = `${endLeft}px`;
+    ghost.style.top = `${endTop}px`;
+  });
+
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    ghost.remove();
+    onDone();
+  };
+  ghost.addEventListener('transitionend', finish, { once: true });
+  setTimeout(finish, MOVE_ANIMATE_MS + 120); // filet de sécurité
+}
+
 function onCellClick(r, c, movableMap) {
-  if (state.winner || aiThinking) return;
+  if (state.winner || aiThinking || animating) return;
 
   // Mode en ligne : on ne peut agir que si c'est bien notre tour.
   if (mode === 'online' && state.turn !== myOwner) return;
@@ -214,13 +279,19 @@ function onCellClick(r, c, movableMap) {
 }
 
 function performMove(fromR, fromC, toR, toC, fromRemote) {
-  state = applyMove(state, fromR, fromC, toR, toC);
-  render();
-  if (state.winner) playWinSound(); else playMoveSound();
+  // Envoyé tout de suite (avant l'animation locale) pour que l'adversaire,
+  // en ligne, voie le coup glisser sans attendre notre propre animation.
   if (mode === 'online' && !fromRemote) {
     net && net.send({ type: 'move', from: [fromR, fromC], to: [toR, toC] });
   }
-  maybeScheduleAiMove();
+  animating = true;
+  animateTowerMove(fromR, fromC, toR, toC, () => {
+    animating = false;
+    state = applyMove(state, fromR, fromC, toR, toC);
+    render();
+    if (state.winner) playWinSound(); else playMoveSound();
+    maybeScheduleAiMove();
+  });
 }
 
 /** En mode IA, si c'est au tour de la machine, calcule et joue son coup. */
@@ -234,6 +305,7 @@ function maybeScheduleAiMove() {
     const move = chooseAiMove(state, aiDifficulty);
     aiThinking = false;
     if (move) {
+      render(); // efface "L'IA réfléchit…" avant de jouer le coup, animé, juste après
       performMove(move.from[0], move.from[1], move.to[0], move.to[1]);
     } else {
       render();
