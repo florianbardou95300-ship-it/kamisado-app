@@ -15,6 +15,8 @@ initAbalone();
 
 document.getElementById('btn-game-kamisado').addEventListener('click', () => showScreen('screen-menu'));
 document.getElementById('btn-game-abalone').addEventListener('click', () => showScreen('screen-abalone-menu'));
+// Coup de Maître est une page autonome (www/coup-de-maitre.html).
+document.getElementById('btn-game-coupdemaitre').addEventListener('click', () => { location.href = 'coup-de-maitre.html'; });
 
 const COLOR_LABEL = {
   orange: 'Orange', blue: 'Bleu', purple: 'Violet', pink: 'Rose',

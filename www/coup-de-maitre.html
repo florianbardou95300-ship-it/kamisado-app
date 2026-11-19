@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Coup de Maître</title>
+<style>
+:root{
+  --felt:#0f2f2a; --felt2:#174a41; --ink:#1d1d24; --cream:#fbf6ea; --red:#c8323c;
+  --chips:#2f7de1; --mult:#e5484d; --gold:#f2b632; --panel:rgba(0,0,0,.28); --muted:#a9c7bf;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;overscroll-behavior:none;color:#fff;background:radial-gradient(ellipse at 50% 30%,var(--felt2),var(--felt) 70%);user-select:none;-webkit-user-select:none;overflow-x:hidden}
+#app{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));display:flex;flex-direction:column;gap:8px;min-height:100%}
+header{display:flex;align-items:center;justify-content:space-between}
+h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.5px}
+h1 span{color:var(--gold)}
+.hdr-left{display:flex;align-items:center;gap:8px}
+.pill{background:var(--panel);border-radius:999px;padding:4px 10px;font-weight:600;font-size:14px}
+.money{color:var(--gold)}
+.iconbtn{background:var(--panel);border:0;color:#fff;border-radius:999px;width:30px;height:30px;font-weight:800;font-size:15px}
+.hdr-right{display:flex;gap:6px;align-items:center}
+.panel{background:var(--panel);border-radius:12px;padding:8px 10px}
+#status .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#defiName{font-weight:800;font-size:15px}
+#defiName.boss{color:var(--gold)}
+.small{font-size:12px;color:var(--muted)}
+.big{font-size:20px;font-weight:800}
+.bar{height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar>div{height:100%;background:linear-gradient(90deg,var(--chips),var(--gold));width:0;transition:width .4s}
+.counters{display:flex;gap:6px;margin-top:6px}
+.counter{flex:1;text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:4px 0;font-size:12px;color:var(--muted)}
+.counter b{display:block;font-size:17px;color:#fff}
+.counter.h b{color:var(--chips)} .counter.d b{color:var(--mult)}
+#atouts{display:flex;gap:6px}
+.slot{flex:1;aspect-ratio:3/4;border-radius:10px;border:2px dashed rgba(255,255,255,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:0}
+.atout{border:2px solid var(--gold);background:linear-gradient(160deg,#3b2a5c,#22183a);cursor:pointer}
+.atout .ic{font-size:24px;line-height:1}
+.atout .nm{font-size:9px;text-align:center;padding:3px 2px 0;line-height:1.1;overflow:hidden;max-height:22px}
+.atout .val{position:absolute;bottom:2px;right:4px;font-size:9px;color:var(--gold)}
+.atout.flash{animation:flash .35s}
+@keyframes flash{50%{transform:scale(1.12) rotate(-3deg);box-shadow:0 0 14px var(--gold)}}
+#calc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px}
+#handName{font-weight:800;font-size:15px;min-height:19px;text-align:center}
+#handName .lv{font-size:11px;color:var(--muted);font-weight:600}
+.calc{display:flex;align-items:center;gap:8px;font-weight:800;font-size:22px}
+.calc .chips,.calc .mult{min-width:76px;text-align:center;border-radius:8px;padding:3px 8px}
+.calc .chips{background:var(--chips)} .calc .mult{background:var(--mult)}
+.calc .bump{animation:bump .25s}
+@keyframes bump{50%{transform:scale(1.18)}}
+#total{font-size:22px;font-weight:800;color:var(--gold);min-height:0;transition:opacity .3s}
+#table{min-height:86px;display:flex;justify-content:center;align-items:center;gap:6px;position:relative}
+#table .hint{color:var(--muted);font-size:13px;text-align:center}
+.card{position:relative;background:var(--cream);color:var(--ink);border-radius:8px;aspect-ratio:5/7;box-shadow:0 3px 0 rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.card.red{color:var(--red)}
+.card .r{position:absolute;top:3px;left:5px;font-weight:800;font-size:clamp(12px,3.6vw,17px);line-height:1}
+.card .s{font-size:clamp(18px,6vw,30px)}
+.card .s2{position:absolute;bottom:2px;right:5px;font-size:clamp(9px,2.6vw,12px)}
+#hand{display:flex;justify-content:center;gap:4px;padding-top:18px}
+#hand .card{flex:0 0 calc((100% - 28px)/8);max-width:62px;cursor:pointer}
+#hand .card.sel{transform:translateY(-16px);box-shadow:0 0 0 3px var(--gold),0 6px 0 rgba(0,0,0,.35)}
+#table .card{width:clamp(44px,15vw,62px)}
+#table .card.score{box-shadow:0 0 0 3px var(--chips),0 3px 0 rgba(0,0,0,.35);transform:translateY(-6px)}
+#table .card.dim{opacity:.45}
+.pop{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font-weight:800;font-size:13px;white-space:nowrap;padding:1px 6px;border-radius:6px;background:var(--chips);color:#fff;animation:pop .9s forwards;pointer-events:none;z-index:5}
+.pop.m{background:var(--mult)} .pop.g{background:var(--gold);color:#222}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,6px)}20%{opacity:1;transform:translate(-50%,-6px)}100%{opacity:0;transform:translate(-50%,-26px)}}
+#sorters{display:flex;justify-content:center;gap:6px}
+.btn{border:0;border-radius:10px;padding:12px 10px;font-family:inherit;font-weight:800;font-size:15px;color:#fff;cursor:pointer}
+.btn:disabled{opacity:.35}
+.btn.sm{padding:6px 12px;font-size:12px;background:var(--panel)}
+#controls{display:flex;gap:8px}
+#controls .btn{flex:1}
+.play{background:var(--chips)} .disc{background:var(--mult)} .goldb{background:var(--gold);color:#222} .ghost{background:rgba(255,255,255,.12)}
+#shop h2{margin:0 0 4px;font-size:18px}
+.offers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.offer{background:rgba(0,0,0,.3);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px}
+.offer .top{display:flex;align-items:center;gap:6px}
+.offer .ic{font-size:26px}
+.offer .nm{font-weight:800;font-size:13px;line-height:1.15}
+.offer .ds{font-size:12px;color:#dfe9e6;flex:1}
+.offer .btn{padding:8px;font-size:13px}
+.offer.sold{opacity:.4}
+.scroll{background:linear-gradient(160deg,#4a3a17,#2a210d)}
+.shopbar{display:flex;gap:8px;margin-top:10px}
+.shopbar .btn{flex:1}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+#modal[hidden]{display:none}
+.box{background:#16322d;border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;max-width:420px;width:100%;max-height:85vh;overflow:auto}
+.box h3{margin:0 0 8px;font-size:19px}
+.box p{margin:6px 0;font-size:14px;line-height:1.4;color:#e4efec}
+.box .btns{display:flex;gap:8px;margin-top:12px}
+.box .btns .btn{flex:1}
+table.lv{width:100%;border-collapse:collapse;font-size:13px}
+table.lv td{padding:5px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+table.lv td.c{color:#8fbaff;text-align:right} table.lv td.m{color:#ff9a9d;text-align:right}
+.sumrow{display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hdr-left"><button class="iconbtn" id="btnQuit" title="Retour">‹</button><h1>Coup de <span>Maître</span></h1></div>
+    <div class="hdr-right">
+      <span class="pill money" id="money">$4</span>
+      <button class="iconbtn" id="btnLevels" title="Mains">♣</button>
+      <button class="iconbtn" id="btnHelp" title="Règles">?</button>
+    </div>
+  </header>
+
+  <section id="status" class="panel">
+    <div class="row"><span id="defiName">Petit défi</span><span class="small" id="miseLbl">Mise 1/8</span></div>
+    <div class="row"><span class="small">Objectif <b id="target" style="color:#fff">300</b></span><span class="big" id="score">0</span></div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="counters">
+      <div class="counter h"><b id="handsLeft">4</b>Mains</div>
+      <div class="counter d"><b id="discLeft">3</b>Défausses</div>
+      <div class="counter"><b id="deckLeft">44</b>Pioche</div>
+    </div>
+  </section>
+
+  <section id="atouts"></section>
+
+  <div id="playZone">
+    <section id="calc" class="panel">
+      <div id="handName"></div>
+      <div class="calc"><span class="chips" id="chips">0</span>×<span class="mult" id="mult">0</span></div>
+      <div id="total"></div>
+    </section>
+    <section id="table"></section>
+    <section id="hand"></section>
+    <div id="sorters" style="margin-top:8px">
+      <button class="btn sm" id="sortRank">Trier par rang</button>
+      <button class="btn sm" id="sortSuit">Trier par couleur</button>
+    </div>
+    <section id="controls" style="margin-top:8px">
+      <button class="btn disc" id="btnDiscard">Défausser</button>
+      <button class="btn play" id="btnPlay">Jouer</button>
+    </section>
+  </div>
+
+  <section id="shop" class="panel hidden"></section>
+</div>
+
+<div id="modal" hidden><div class="box" id="modalBox"></div></div>
+
+<script>
+// ---------- Données ----------
+const SUITS=['♠','♥','♣','♦'];
+const RLBL={11:'V',12:'D',13:'R',14:'A'};
+const rl=r=>RLBL[r]||String(r);
+const HANDS={
+  haute:{n:'Carte haute',c:5,m:1,dc:10,dm:1},
+  paire:{n:'Paire',c:12,m:2,dc:15,dm:1},
+  double:{n:'Double paire',c:22,m:2,dc:20,dm:1},
+  brelan:{n:'Brelan',c:30,m:3,dc:20,dm:2},
+  suite:{n:'Suite',c:35,m:4,dc:30,dm:3},
+  couleur:{n:'Couleur',c:38,m:4,dc:15,dm:2},
+  full:{n:'Full',c:45,m:4,dc:25,dm:2},
+  carre:{n:'Carré',c:65,m:6,dc:30,dm:3},
+  qf:{n:'Quinte flush',c:110,m:8,dc:40,dm:4}
+};
+const BASE_T=[300,700,1600,4000,9000,18000,32000,55000];
+const DEFIS=['Petit défi','Grand défi','Défi du Maître'];
+const DEFI_MUL=[1,1.5,2];
+const DEFI_REWARD=[3,4,5];
+const MAX_ATOUTS=5, HAND_SIZE=8;
+
+const ATOUTS={
+  saltimbanque:{n:'Le Saltimbanque',i:'🎭',p:3,d:'+4 Multi',
+    hand:c=>{c.mult+=4;return['+4 Multi','m']}},
+  artichaut:{n:"Cœur d'artichaut",i:'💗',p:5,d:'Chaque ♥ marqué : +3 Multi',
+    card:(k,c)=>{if(k.s===1){c.mult+=3;return['+3 Multi','m']}}},
+  piquenique:{n:'Pique-nique',i:'🧺',p:5,d:'Chaque ♠ marqué : +25 Base',
+    card:(k,c)=>{if(k.s===0){c.chips+=25;return['+25','c']}}},
+  trefle:{n:'Trèfle porte-bonheur',i:'🍀',p:5,d:'Chaque ♣ marqué : +1 $',
+    card:k=>{if(k.s===2){G.money+=1;return['+1 $','g']}}},
+  vitrail:{n:'Le Vitrail',i:'🔷',p:5,d:'Chaque ♦ marqué : +10 Base et +2 Multi',
+    card:(k,c)=>{if(k.s===3){c.chips+=10;c.mult+=2;return['+10 / +2','m']}}},
+  jumeaux:{n:'Les Jumeaux',i:'👯',p:4,d:'Si la main contient une Paire : +8 Multi',
+    hand:c=>{if(c.has.paire){c.mult+=8;return['+8 Multi','m']}}},
+  trio:{n:'Le Trio',i:'🎺',p:7,d:'Si la main contient un Brelan : ×2 Multi',
+    hand:c=>{if(c.has.brelan){c.mult*=2;return['×2 Multi','m']}}},
+  escalier:{n:"L'Escalier",i:'🪜',p:7,d:'Si la main contient une Suite : ×2,5 Multi',
+    hand:c=>{if(c.has.suite){c.mult*=2.5;return['×2,5 Multi','m']}}},
+  peintre:{n:'Le Peintre',i:'🎨',p:7,d:'Si la main contient une Couleur : ×2 Multi',
+    hand:c=>{if(c.has.couleur){c.mult*=2;return['×2 Multi','m']}}},
+  cour:{n:'La Cour',i:'👑',p:5,d:'Chaque figure (V, D, R) marquée : +30 Base',
+    card:(k,c)=>{if(k.r>=11&&k.r<=13){c.chips+=30;return['+30','c']}}},
+  fretin:{n:'Menu fretin',i:'🐟',p:5,d:'Chaque carte de 2 à 5 marquée : +4 Multi',
+    card:(k,c)=>{if(k.r<=5){c.mult+=4;return['+4 Multi','m']}}},
+  tirelire:{n:'La Tirelire',i:'🐷',p:6,d:'+1 Multi par tranche de 3 $ possédés',
+    hand:c=>{const v=Math.floor(G.money/3);if(v){c.mult+=v;return['+'+v+' Multi','m']}}},
+  souffle:{n:'Dernier souffle',i:'🌬️',p:7,d:'×3 Multi sur la dernière main du défi',
+    hand:c=>{if(c.last){c.mult*=3;return['×3 Multi','m']}}},
+  econome:{n:"L'Économe",i:'🧮',p:5,d:'+20 Base par défausse restante',
+    hand:c=>{const v=G.discards*20;if(v){c.chips+=v;return['+'+v,'c']}}},
+  meute:{n:'La Meute',i:'🐺',p:6,d:'+3 Multi par Atout possédé',
+    hand:c=>{const v=G.atouts.length*3;c.mult+=v;return['+'+v+' Multi','m']}},
+  bourgeon:{n:'Le Bourgeon',i:'🌱',p:6,d:a=>'Gagne +1 Multi à chaque main jouée (actuel : +'+(a?a.v:0)+')',
+    hand:(c,a)=>{if(a.v){c.mult+=a.v;return['+'+a.v+' Multi','m']}},after:(c,a)=>{a.v++},val:a=>'+'+a.v},
+  ancien:{n:"L'Ancien",i:'🧙',p:8,d:'Chaque As marqué : ×1,5 Multi',
+    card:(k,c)=>{if(k.r===14){c.mult*=1.5;return['×1,5','m']}}},
+  banquier:{n:'Le Banquier',i:'🎩',p:5,d:'+3 $ à la fin de chaque défi gagné',end:()=>3},
+  minimaliste:{n:'Le Minimaliste',i:'◽',p:5,d:'Si 3 cartes ou moins sont jouées : +12 Multi',
+    hand:c=>{if(c.n<=3){c.mult+=12;return['+12 Multi','m']}}}
+};
+const descOf=(id,a)=>{const d=ATOUTS[id].d;return typeof d==='function'?d(a):d};
+const sellOf=id=>Math.max(1,Math.floor(ATOUTS[id].p/2));
+
+// ---------- Utilitaires ----------
+const $=s=>document.querySelector(s);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const fmt=n=>Math.floor(n).toLocaleString('fr-FR');
+const fmtM=m=>Number.isInteger(m)?String(m):(Math.round(m*10)/10).toString().replace('.',',');
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+let uidc=0;
+const fullDeck=()=>{const d=[];for(let s=0;s<4;s++)for(let r=2;r<=14;r++)d.push({id:++uidc,r,s});return d};
+const cardChips=c=>c.r===14?11:(c.r>=11?10:c.r);
+const lvlVals=k=>{const h=HANDS[k],l=G.levels[k];return{c:h.c+h.dc*(l-1),m:h.m+h.dm*(l-1)}};
+function getBest(){try{return JSON.parse(localStorage.getItem('cdm_best')||'0')}catch(e){return 0}}
+function setBest(v){try{if(v>getBest())localStorage.setItem('cdm_best',JSON.stringify(v))}catch(e){}}
+
+// ---------- Évaluation des mains ----------
+function evaluate(cs){
+  const cnt={};cs.forEach(c=>cnt[c.r]=(cnt[c.r]||0)+1);
+  const groups=Object.entries(cnt).map(([r,n])=>({r:+r,n})).sort((a,b)=>b.n-a.n||b.r-a.r);
+  const g0=groups[0]?groups[0].n:0,g1=groups[1]?groups[1].n:0;
+  const flush=cs.length===5&&cs.every(c=>c.s===cs[0].s);
+  let straight=false;
+  if(cs.length===5&&groups.length===5){
+    const rs=groups.map(g=>g.r).sort((a,b)=>a-b);
+    straight=rs[4]-rs[0]===4||rs.join()==='2,3,4,5,14';
+  }
+  const has={paire:g0>=2,double:g0>=2&&g1>=2,brelan:g0>=3,suite:straight,couleur:flush,carre:g0>=4};
+  const of=rs=>cs.filter(c=>rs.includes(c.r));
+  let type,scoring;
+  if(straight&&flush){type='qf';scoring=cs}
+  else if(g0===4){type='carre';scoring=of([groups[0].r])}
+  else if(g0===3&&g1>=2){type='full';scoring=cs}
+  else if(flush){type='couleur';scoring=cs}
+  else if(straight){type='suite';scoring=cs}
+  else if(g0===3){type='brelan';scoring=of([groups[0].r])}
+  else if(g0===2&&g1===2){type='double';scoring=of([groups[0].r,groups[1].r])}
+  else if(g0===2){type='paire';scoring=of([groups[0].r])}
+  else{const hi=cs.reduce((a,b)=>b.r>a.r?b:a);type='haute';scoring=[hi]}
+  return{type,scoring,has};
+}
+
+// ---------- État ----------
+let G;
+function newRun(){
+  G={mise:1,defi:0,money:4,atouts:[],levels:Object.fromEntries(Object.keys(HANDS).map(k=>[k,1])),
+     phase:'play',reroll:5,shop:null,busy:false,sort:'rank',sel:new Set(),hand:[],deck:[]};
+  startDefi();
+}
+function target(){
+  const base=G.mise<=8?BASE_T[G.mise-1]:Math.round(55000*Math.pow(1.9,G.mise-8));
+  return Math.round(base*DEFI_MUL[G.defi]);
+}
+function startDefi(){
+  G.deck=shuffle(fullDeck());G.hand=[];G.sel=new Set();
+  G.hands=4;G.discards=3;G.score=0;G.phase='play';G.busy=false;
+  drawCards();render();resetCalc();
+}
+function drawCards(){while(G.hand.length<HAND_SIZE&&G.deck.length)G.hand.push(G.deck.pop());sortHand()}
+function sortHand(){
+  if(G.sort==='rank')G.hand.sort((a,b)=>b.r-a.r||a.s-b.s);
+  else G.hand.sort((a,b)=>a.s-b.s||b.r-a.r);
+}
+
+// ---------- Rendu ----------
+function cardEl(c){
+  const d=document.createElement('div');
+  d.className='card'+((c.s===1||c.s===3)?' red':'');d.dataset.id=c.id;
+  d.innerHTML=`<span class="r">${rl(c.r)}</span><span class="s">${SUITS[c.s]}</span><span class="s2">${SUITS[c.s]}</span>`;
+  return d;
+}
+function render(){
+  $('#money').textContent='$'+G.money;
+  const boss=G.defi===2;
+  $('#defiName').textContent=DEFIS[G.defi];$('#defiName').classList.toggle('boss',boss);
+  $('#miseLbl').textContent='Mise '+G.mise+(G.mise<=8?'/8':' (infini)');
+  $('#target').textContent=fmt(target());
+  $('#score').textContent=fmt(G.score);
+  $('#bar').style.width=Math.min(100,G.score/target()*100)+'%';
+  $('#handsLeft').textContent=G.hands;$('#discLeft').textContent=G.discards;$('#deckLeft').textContent=G.deck.length;
+  renderAtouts();
+  const shop=G.phase==='shop';
+  $('#playZone').classList.toggle('hidden',shop);$('#shop').classList.toggle('hidden',!shop);
+  if(shop){renderShop();return}
+  const h=$('#hand');h.innerHTML='';
+  G.hand.forEach(c=>{const e=cardEl(c);if(G.sel.has(c.id))e.classList.add('sel');e.onclick=()=>toggle(c.id);h.appendChild(e)});
+  $('#btnPlay').disabled=G.busy||!G.sel.size||G.hands<=0;
+  $('#btnDiscard').disabled=G.busy||!G.sel.size||G.discards<=0;
+  $('#btnPlay').textContent='Jouer'+(G.sel.size?' ('+G.sel.size+')':'');
+  $('#btnDiscard').textContent='Défausser'+(G.discards?' ('+G.discards+')':'');
+  if(!G.busy){preview();if(!$('#table').children.length)$('#table').innerHTML='<div class="hint">Sélectionne jusqu’à 5 cartes</div>'}
+}
+function renderAtouts(){
+  const w=$('#atouts');w.innerHTML='';
+  for(let i=0;i<MAX_ATOUTS;i++){
+    const a=G.atouts[i];const s=document.createElement('div');
+    if(a){
+      const d=ATOUTS[a.id];s.className='slot atout';s.dataset.uid=a.uid;
+      s.innerHTML=`<div class="ic">${d.i}</div><div class="nm">${d.n}</div>`+(d.val?`<div class="val">${d.val(a)}</div>`:'');
+      s.onclick=()=>atoutInfo(a);
+    }else s.className='slot';
+    w.appendChild(s);
+  }
+}
+function preview(){
+  const cs=G.hand.filter(c=>G.sel.has(c.id));
+  $('#total').textContent='';
+  if(!cs.length){$('#handName').textContent='';$('#chips').textContent='0';$('#mult').textContent='0';return}
+  const ev=evaluate(cs),v=lvlVals(ev.type);
+  $('#handName').innerHTML=HANDS[ev.type].n+' <span class="lv">niv. '+G.levels[ev.type]+'</span>';
+  $('#chips').textContent=v.c;$('#mult').textContent=v.m;
+}
+function resetCalc(){$('#table').innerHTML='';render()}
+function setCalc(ctx,bumpWhich){
+  $('#chips').textContent=fmt(ctx.chips);$('#mult').textContent=fmtM(ctx.mult);
+  if(bumpWhich){const el=$(bumpWhich==='c'?'#chips':'#mult');el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
+}
+function pop(el,txt,cls){
+  if(!el)return;const p=document.createElement('span');p.className='pop '+(cls||'');p.textContent=txt;
+  el.appendChild(p);setTimeout(()=>p.remove(),950);
+}
+function atoutEl(uid){return document.querySelector(`.atout[data-uid="${uid}"]`)}
+
+// ---------- Actions ----------
+function toggle(id){
+  if(G.busy)return;
+  if(G.sel.has(id))G.sel.delete(id);else if(G.sel.size<5)G.sel.add(id);
+  $('#table').innerHTML='';render();
+}
+function discard(){
+  if(G.busy||!G.sel.size||G.discards<=0)return;
+  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.discards--;
+  drawCards();$('#table').innerHTML='';render();
+}
+async function play(){
+  if(G.busy||!G.sel.size||G.hands<=0)return;
+  G.busy=true;
+  const cards=G.hand.filter(c=>G.sel.has(c.id));
+  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.hands--;
+  const ev=evaluate(cards),v=lvlVals(ev.type);
+  const ctx={chips:v.c,mult:v.m,type:ev.type,has:ev.has,n:cards.length,last:G.hands===0};
+  // table
+  const t=$('#table');t.innerHTML='';const els={};
+  const scoringIds=new Set(ev.scoring.map(c=>c.id));
+  cards.forEach(c=>{const e=cardEl(c);e.classList.add(scoringIds.has(c.id)?'score':'dim');els[c.id]=e;t.appendChild(e)});
+  render();
+  $('#handName').innerHTML=HANDS[ev.type].n+' <span class="lv">niv. '+G.levels[ev.type]+'</span>';
+  setCalc(ctx);
+  await sleep(450);
+  for(const c of cards){
+    if(!scoringIds.has(c.id))continue;
+    const ch=cardChips(c);ctx.chips+=ch;pop(els[c.id],'+'+ch,'c');setCalc(ctx,'c');await sleep(280);
+    for(const a of G.atouts){
+      const d=ATOUTS[a.id];if(!d.card)continue;
+      const r=d.card(c,ctx,a);
+      if(r){pop(els[c.id],r[0],r[1]);flash(a.uid);setCalc(ctx,r[1]==='c'?'c':'m');$('#money').textContent='$'+G.money;await sleep(280)}
+    }
+  }
+  for(const a of G.atouts){
+    const d=ATOUTS[a.id];if(!d.hand)continue;
+    const r=d.hand(ctx,a);
+    if(r){flash(a.uid,r);setCalc(ctx,r[1]==='c'?'c':'m');await sleep(330)}
+  }
+  G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.after)d.after(ctx,a)});
+  const total=Math.floor(ctx.chips*ctx.mult);
+  $('#total').textContent='= '+fmt(total);
+  await sleep(350);
+  const from=G.score,to=G.score+total,steps=18;
+  for(let i=1;i<=steps;i++){G.score=Math.floor(from+(to-from)*i/steps);$('#score').textContent=fmt(G.score);$('#bar').style.width=Math.min(100,G.score/target()*100)+'%';await sleep(28)}
+  G.score=to;
+  await sleep(500);
+  t.innerHTML='';$('#total').textContent='';
+  if(G.score>=target()){winDefi();return}
+  if(G.hands<=0){gameOver();return}
+  drawCards();G.busy=false;render();
+}
+function flash(uid,r){
+  const el=atoutEl(uid);if(!el)return;
+  el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+  if(r)pop(el,r[0],r[1]);
+}
+
+// ---------- Fin de défi / boutique ----------
+function winDefi(){
+  const base=DEFI_REWARD[G.defi];
+  const interest=Math.min(5,Math.floor(G.money/5));
+  const hb=G.hands;
+  let extra=0;G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.end)extra+=d.end(a)});
+  const tot=base+interest+hb+extra;G.money+=tot;G.busy=false;
+  const finalWin=G.mise===8&&G.defi===2;
+  setBest(G.mise*3+G.defi+1);
+  let html=`<h3>${DEFIS[G.defi]} réussi ! 🎉</h3><p>Score ${fmt(G.score)} / ${fmt(target())}</p>
+    <div class="sumrow"><span>Récompense du défi</span><b>+$${base}</b></div>
+    <div class="sumrow"><span>Mains restantes (${hb})</span><b>+$${hb}</b></div>
+    <div class="sumrow"><span>Intérêts (1 $ par 5 $, max 5)</span><b>+$${interest}</b></div>`+
+    (extra?`<div class="sumrow"><span>Atouts</span><b>+$${extra}</b></div>`:'')+
+    `<div class="sumrow"><span><b>Total</b></span><b style="color:var(--gold)">+$${tot}</b></div>`;
+  if(finalWin){
+    html=`<h3>Victoire ! 🏆</h3><p>Tu as battu le Défi du Maître de la Mise 8. Coup de maître !</p>`+html.replace(/<h3>.*?<\/h3>/,'');
+    modal(html,[{t:'Nouvelle partie',c:'ghost',f:()=>{closeModal();newRun()}},{t:'Continuer (infini)',c:'goldb',f:()=>{closeModal();openShop()}}]);
+  }else modal(html,[{t:'Boutique →',c:'goldb',f:()=>{closeModal();openShop()}}]);
+  render();
+}
+function gameOver(){
+  G.busy=false;G.phase='over';
+  const best=getBest();
+  modal(`<h3>Partie terminée</h3><p>Le ${DEFIS[G.defi]} de la Mise ${G.mise} t'a eu : ${fmt(G.score)} / ${fmt(target())}.</p>
+    <p class="small">Record : ${best?('Mise '+Math.ceil(best/3)):'—'}</p>`,
+    [{t:'Rejouer',c:'goldb',f:()=>{closeModal();newRun()}}]);
+  render();
+}
+function rollShop(){
+  const owned=new Set(G.atouts.map(a=>a.id));
+  const pool=Object.keys(ATOUTS).filter(k=>!owned.has(k));
+  shuffle(pool);
+  G.shop={atouts:pool.slice(0,2),scrolls:[pick(Object.keys(HANDS)),pick(Object.keys(HANDS))]};
+}
+function openShop(){G.phase='shop';G.reroll=5;rollShop();render()}
+function renderShop(){
+  const s=$('#shop');
+  let h=`<h2>Boutique <span class="money" style="float:right">$${G.money}</span></h2>
+    <div class="small">Atouts : ${G.atouts.length}/${MAX_ATOUTS} · touche un Atout en haut pour le vendre</div><div class="offers">`;
+  G.shop.atouts.forEach((id,i)=>{
+    if(!id){h+=`<div class="offer sold"><div class="nm">Vendu</div></div>`;return}
+    const d=ATOUTS[id],ok=G.money>=d.p&&G.atouts.length<MAX_ATOUTS;
+    h+=`<div class="offer"><div class="top"><span class="ic">${d.i}</span><span class="nm">${d.n}</span></div>
+      <div class="ds">${descOf(id,{v:0})}</div><button class="btn goldb" data-ba="${i}" ${ok?'':'disabled'}>Acheter $${d.p}</button></div>`;
+  });
+  G.shop.scrolls.forEach((k,i)=>{
+    if(!k){h+=`<div class="offer sold scroll"><div class="nm">Vendu</div></div>`;return}
+    const hd=HANDS[k],ok=G.money>=3;
+    h+=`<div class="offer scroll"><div class="top"><span class="ic">📜</span><span class="nm">Parchemin : ${hd.n}</span></div>
+      <div class="ds">${hd.n} passe au niveau ${G.levels[k]+1} (+${hd.dc} Base, +${hd.dm} Multi)</div>
+      <button class="btn goldb" data-bs="${i}" ${ok?'':'disabled'}>Acheter $3</button></div>`;
+  });
+  h+=`</div><div class="shopbar"><button class="btn ghost" id="btnReroll" ${G.money>=G.reroll?'':'disabled'}>Relancer $${G.reroll}</button>
+    <button class="btn play" id="btnNext">Défi suivant →</button></div>`;
+  s.innerHTML=h;
+  s.querySelectorAll('[data-ba]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.ba,id=G.shop.atouts[i],d=ATOUTS[id];
+    if(G.money<d.p||G.atouts.length>=MAX_ATOUTS)return;
+    G.money-=d.p;G.atouts.push({uid:++uidc,id,v:0});G.shop.atouts[i]=null;render();
+  });
+  s.querySelectorAll('[data-bs]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.bs,k=G.shop.scrolls[i];if(G.money<3)return;
+    G.money-=3;G.levels[k]++;G.shop.scrolls[i]=null;render();
+  });
+  $('#btnReroll').onclick=()=>{if(G.money<G.reroll)return;G.money-=G.reroll;G.reroll++;rollShop();render()};
+  $('#btnNext').onclick=()=>{G.defi++;if(G.defi>2){G.defi=0;G.mise++}startDefi()};
+}
+
+// ---------- Modales ----------
+function modal(html,btns){
+  const b=$('#modalBox');b.innerHTML=html+'<div class="btns"></div>';
+  const w=b.querySelector('.btns');
+  (btns||[{t:'OK',c:'ghost',f:closeModal}]).forEach(x=>{const e=document.createElement('button');e.className='btn '+x.c;e.textContent=x.t;e.onclick=x.f;w.appendChild(e)});
+  $('#modal').hidden=false;
+}
+function closeModal(){$('#modal').hidden=true}
+function atoutInfo(a){
+  const d=ATOUTS[a.id],canSell=!G.busy&&G.phase!=='over';
+  modal(`<h3>${d.i} ${d.n}</h3><p>${descOf(a.id,a)}</p><p class="small">Revente : $${sellOf(a.id)}</p>`,
+    [{t:'Fermer',c:'ghost',f:closeModal}].concat(canSell?[{t:'Vendre +$'+sellOf(a.id),c:'disc',f:()=>{
+      G.money+=sellOf(a.id);G.atouts=G.atouts.filter(x=>x.uid!==a.uid);closeModal();render()}}]:[]));
+}
+function showLevels(){
+  let h='<h3>Mains de poker</h3><table class="lv">';
+  Object.keys(HANDS).reverse().forEach(k=>{const v=lvlVals(k);h+=`<tr><td>${HANDS[k].n}</td><td class="small">niv. ${G.levels[k]}</td><td class="c">${v.c}</td><td>×</td><td class="m">${v.m}</td></tr>`});
+  h+='</table><p class="small">Base en bleu, Multi en rouge. Les Parchemins de la boutique font monter le niveau.</p>';
+  modal(h);
+}
+function showHelp(){
+  modal(`<h3>Comment jouer</h3>
+  <p>Chaque défi a un <b>objectif</b> de points. Tu as <b>4 mains</b> et <b>3 défausses</b> pour l'atteindre.</p>
+  <p>Sélectionne jusqu'à 5 cartes et joue une main de poker. Score = <b style="color:#8fbaff">Base</b> × <b style="color:#ff9a9d">Multi</b>. Les cartes qui comptent ajoutent leur valeur à la Base (figures 10, As 11).</p>
+  <p>Chaque Mise comporte 3 défis : Petit, Grand, puis le Défi du Maître. Bats la <b>Mise 8</b> pour gagner.</p>
+  <p>Entre les défis, la <b>boutique</b> propose des <b>Atouts</b> (bonus permanents, 5 max, l'ordre compte : de gauche à droite) et des <b>Parchemins</b> qui améliorent un type de main.</p>
+  <p>Argent : récompense du défi + 1 $ par main non jouée + 1 $ d'intérêt par tranche de 5 $ (max 5).</p>`);
+}
+
+// ---------- Init ----------
+$('#btnPlay').onclick=play;
+$('#btnDiscard').onclick=discard;
+$('#sortRank').onclick=()=>{if(G.busy)return;G.sort='rank';sortHand();render()};
+$('#sortSuit').onclick=()=>{if(G.busy)return;G.sort='suit';sortHand();render()};
+$('#btnLevels').onclick=showLevels;
+$('#btnHelp').onclick=showHelp;
+$('#btnQuit').onclick=()=>{if(G.busy)return;modal('<h3>Quitter la partie ?</h3><p>La partie en cours sera perdue.</p>',[{t:'Rester',c:'ghost',f:closeModal},{t:'Quitter',c:'disc',f:()=>{location.href='index.html'}}])};
+$('#modal').onclick=e=>{if(e.target.id==='modal'&&G.phase!=='over'&&!$('#modalBox .goldb'))closeModal()};
+newRun();
+</script>
+</body>
+</html>

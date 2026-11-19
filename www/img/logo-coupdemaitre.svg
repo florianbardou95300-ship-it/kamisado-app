@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="cdmBg" cx="50%" cy="34%" r="75%">
+      <stop offset="0%" stop-color="#1f5a4f"/>
+      <stop offset="60%" stop-color="#123a33"/>
+      <stop offset="100%" stop-color="#0a221e"/>
+    </radialGradient>
+    <linearGradient id="cdmGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd877"/>
+      <stop offset="100%" stop-color="#d9921c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="url(#cdmBg)"/>
+  <g transform="rotate(-14 512 560)">
+    <rect x="250" y="260" width="330" height="460" rx="40" fill="#e9e1cf" stroke="#0a221e" stroke-width="10"/>
+    <text x="415" y="570" font-family="Arial, sans-serif" font-size="260" text-anchor="middle" fill="#1d1d24">♠</text>
+  </g>
+  <g transform="rotate(12 512 560)">
+    <rect x="450" y="250" width="330" height="460" rx="40" fill="#fbf6ea" stroke="#0a221e" stroke-width="10"/>
+    <text x="615" y="560" font-family="Arial, sans-serif" font-size="260" text-anchor="middle" fill="#c8323c">♥</text>
+  </g>
+  <circle cx="770" cy="790" r="120" fill="url(#cdmGold)" stroke="#0a221e" stroke-width="10"/>
+  <text x="770" y="840" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="140" text-anchor="middle" fill="#2a1a00">×</text>
+</svg>
