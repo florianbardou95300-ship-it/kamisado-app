@@ -10,62 +10,117 @@
   --chips:#2f7de1; --mult:#e5484d; --gold:#f2b632; --panel:rgba(0,0,0,.28); --muted:#a9c7bf;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;overscroll-behavior:none;color:#fff;background:radial-gradient(ellipse at 50% 30%,var(--felt2),var(--felt) 70%);user-select:none;-webkit-user-select:none;overflow-x:hidden}
-#app{max-width:560px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));display:flex;flex-direction:column;gap:8px;min-height:100%}
+html,body{margin:0;min-height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#fff;background:radial-gradient(ellipse at 50% 30%,var(--felt2),var(--felt) 70%) fixed;user-select:none;-webkit-user-select:none;overflow-x:hidden;overscroll-behavior:none}
+#app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:7px;
+  padding:calc(38px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left))}
+
+/* Guirlande */
+.garland{position:fixed;left:0;right:0;height:36px;pointer-events:none;z-index:3;width:100%}
+.garland.top{top:env(safe-area-inset-top)}
+.garland.bot{bottom:env(safe-area-inset-bottom);transform:scaleY(-1)}
+.bulb{animation:blink 1.1s steps(1) infinite}
+.bulb.b2{animation-delay:-.55s}
+.garland.fast .bulb{animation-duration:.26s}
+@keyframes blink{0%{opacity:1}50%{opacity:.22}}
+
 header{display:flex;align-items:center;justify-content:space-between}
+.hdr-left,.hdr-right{display:flex;gap:6px;align-items:center}
 h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.5px}
 h1 span{color:var(--gold)}
-.hdr-left{display:flex;align-items:center;gap:8px}
-.pill{background:var(--panel);border-radius:999px;padding:4px 10px;font-weight:600;font-size:14px}
+.pill{background:var(--panel);border-radius:999px;padding:4px 10px;font-weight:700;font-size:15px;position:relative}
 .money{color:var(--gold)}
-.iconbtn{background:var(--panel);border:0;color:#fff;border-radius:999px;width:30px;height:30px;font-weight:800;font-size:15px}
-.hdr-right{display:flex;gap:6px;align-items:center}
+.iconbtn{background:var(--panel);border:0;color:#fff;border-radius:999px;width:30px;height:30px;font-weight:800;font-size:15px;padding:0}
 .panel{background:var(--panel);border-radius:12px;padding:8px 10px}
-#status .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 #defiName{font-weight:800;font-size:15px}
 #defiName.boss{color:var(--gold)}
 .small{font-size:12px;color:var(--muted)}
-.big{font-size:20px;font-weight:800}
+.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.2)}}
+
+/* Objectif + score */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.goal{background:linear-gradient(160deg,#5c2f00,#2e1600);border:3px solid var(--gold);border-radius:12px;text-align:center;padding:5px 4px;box-shadow:0 0 16px rgba(242,182,50,.45),inset 0 0 12px rgba(242,182,50,.25);animation:goalglow 2.2s ease-in-out infinite}
+@keyframes goalglow{50%{box-shadow:0 0 26px rgba(242,182,50,.8),inset 0 0 16px rgba(242,182,50,.4)}}
+.goal .lbl,.scorebox .lbl{font-size:10px;letter-spacing:2.5px;font-weight:800;color:var(--gold)}
+.goal .num{font-size:28px;font-weight:900;line-height:1.1;text-shadow:0 0 10px rgba(242,182,50,.9)}
+.goal .rew{font-size:11px;color:#ffe3a3}
+.scorebox{background:rgba(0,0,0,.3);border-radius:12px;text-align:center;padding:5px 4px;position:relative;overflow:visible}
+.scorebox .lbl{color:#9cc6ff}
+#scoreWrap{height:44px;display:flex;align-items:center;justify-content:center;position:relative;z-index:4}
+#scoreScale{display:inline-block;transition:transform .25s ease-out}
+#score{display:inline-block;font-size:26px;font-weight:900;transition:color .3s}
+#score.warm{color:#ffe08a;text-shadow:0 0 12px rgba(255,200,80,.8);animation:wobble .8s ease-in-out infinite}
+#score.hot{color:#ff8a4c;text-shadow:0 0 18px rgba(255,90,40,.95),0 0 4px #fff;animation:shake .13s linear infinite}
+#score.boom{animation:boom .8s ease-out}
+@keyframes wobble{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg) scale(1.05)}}
+@keyframes shake{0%{transform:translate(1px,-1px) rotate(-1deg)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,2px) rotate(1deg)}75%{transform:translate(-1px,-2px)}100%{transform:translate(1px,1px)}}
+@keyframes boom{0%{transform:scale(1)}30%{transform:scale(2.3);color:#fff;text-shadow:0 0 40px #fff,0 0 20px var(--gold)}100%{transform:scale(1)}}
 .bar{height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-top:6px}
-.bar>div{height:100%;background:linear-gradient(90deg,var(--chips),var(--gold));width:0;transition:width .4s}
+.bar>div{height:100%;background:linear-gradient(90deg,var(--chips),var(--gold));width:0;transition:width .3s}
+.bar.hot>div{background:linear-gradient(90deg,var(--gold),#ff5a2a);animation:barpulse .4s infinite}
+@keyframes barpulse{50%{filter:brightness(1.5)}}
 .counters{display:flex;gap:6px;margin-top:6px}
-.counter{flex:1;text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:4px 0;font-size:12px;color:var(--muted)}
-.counter b{display:block;font-size:17px;color:#fff}
-.counter.h b{color:var(--chips)} .counter.d b{color:var(--mult)}
+.counter{flex:1;text-align:center;background:rgba(0,0,0,.25);border-radius:8px;padding:3px 0;font-size:11px;color:var(--muted)}
+.counter b{display:block;font-size:16px;color:#fff}
+.counter.h b{color:#7fb3ff} .counter.d b{color:#ff8a8d}
+.spark{position:fixed;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:60;animation:spark .95s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) rotate(600deg);opacity:0}}
+#flashFx{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:55}
+#flashFx.on{animation:flashfx .5s}
+@keyframes flashfx{0%{opacity:.7}100%{opacity:0}}
+
+/* Atouts & charmes */
 #atouts{display:flex;gap:6px}
-.slot{flex:1;aspect-ratio:3/4;border-radius:10px;border:2px dashed rgba(255,255,255,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:0}
+.slot{flex:1;height:72px;border-radius:10px;border:2px dashed rgba(255,255,255,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:0}
 .atout{border:2px solid var(--gold);background:linear-gradient(160deg,#3b2a5c,#22183a);cursor:pointer}
 .atout .ic{font-size:24px;line-height:1}
 .atout .nm{font-size:9px;text-align:center;padding:3px 2px 0;line-height:1.1;overflow:hidden;max-height:22px}
-.atout .val{position:absolute;bottom:2px;right:4px;font-size:9px;color:var(--gold)}
+.atout .val{position:absolute;top:2px;right:4px;font-size:9px;color:var(--gold);font-weight:800}
 .atout.flash{animation:flash .35s}
 @keyframes flash{50%{transform:scale(1.12) rotate(-3deg);box-shadow:0 0 14px var(--gold)}}
-#calc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px}
+#charmes{display:flex;gap:6px;align-items:center}
+#charmes .lbl{font-size:11px;color:var(--muted);width:56px}
+.chslot{flex:1;height:32px;border-radius:9px;border:2px dashed rgba(255,154,209,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;gap:4px;padding:0 4px;overflow:hidden;white-space:nowrap}
+.chslot.full{border:2px solid #ff9ad1;background:linear-gradient(160deg,#5a1d3a,#2e0f20);cursor:pointer}
+
+/* Calcul */
+#calc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px}
 #handName{font-weight:800;font-size:15px;min-height:19px;text-align:center}
 #handName .lv{font-size:11px;color:var(--muted);font-weight:600}
 .calc{display:flex;align-items:center;gap:8px;font-weight:800;font-size:22px}
 .calc .chips,.calc .mult{min-width:76px;text-align:center;border-radius:8px;padding:3px 8px}
 .calc .chips{background:var(--chips)} .calc .mult{background:var(--mult)}
-.calc .bump{animation:bump .25s}
-@keyframes bump{50%{transform:scale(1.18)}}
-#total{font-size:22px;font-weight:800;color:var(--gold);min-height:0;transition:opacity .3s}
-#table{min-height:86px;display:flex;justify-content:center;align-items:center;gap:6px;position:relative}
+#total{font-size:20px;font-weight:800;color:var(--gold);min-height:24px}
+
+/* Cartes */
+#table{min-height:82px;display:flex;justify-content:center;align-items:center;gap:6px;position:relative}
 #table .hint{color:var(--muted);font-size:13px;text-align:center}
 .card{position:relative;background:var(--cream);color:var(--ink);border-radius:8px;aspect-ratio:5/7;box-shadow:0 3px 0 rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;transition:transform .15s}
 .card.red{color:var(--red)}
 .card .r{position:absolute;top:3px;left:5px;font-weight:800;font-size:clamp(12px,3.6vw,17px);line-height:1}
 .card .s{font-size:clamp(18px,6vw,30px)}
 .card .s2{position:absolute;bottom:2px;right:5px;font-size:clamp(9px,2.6vw,12px)}
+.card .eb{position:absolute;top:2px;right:2px;font-size:clamp(9px,2.6vw,12px)}
+.card.e-flamme{background:linear-gradient(170deg,#fff4ea,#ffc89e)}
+.card.e-cristal{background:linear-gradient(170deg,#f2fbff,#b9e4ff)}
+.card.e-doree{background:linear-gradient(170deg,#fff8d6,#ffd75e);box-shadow:0 0 0 2px #d9a514,0 3px 0 rgba(0,0,0,.35)}
+.card.e-acier{background:linear-gradient(170deg,#f3f5f8,#b9c0cc)}
 #hand{display:flex;justify-content:center;gap:4px;padding-top:18px}
-#hand .card{flex:0 0 calc((100% - 28px)/8);max-width:62px;cursor:pointer}
+#hand .card{flex:0 0 calc((100% - 32px)/9);max-width:60px;cursor:pointer}
+#hand.n8 .card{flex-basis:calc((100% - 28px)/8)}
 #hand .card.sel{transform:translateY(-16px);box-shadow:0 0 0 3px var(--gold),0 6px 0 rgba(0,0,0,.35)}
+#hand .card.deal{animation:deal .32s ease-out backwards}
+@keyframes deal{from{transform:translate(-140px,-220px) rotate(-30deg);opacity:0}}
 #table .card{width:clamp(44px,15vw,62px)}
 #table .card.score{box-shadow:0 0 0 3px var(--chips),0 3px 0 rgba(0,0,0,.35);transform:translateY(-6px)}
 #table .card.dim{opacity:.45}
 .pop{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font-weight:800;font-size:13px;white-space:nowrap;padding:1px 6px;border-radius:6px;background:var(--chips);color:#fff;animation:pop .9s forwards;pointer-events:none;z-index:5}
 .pop.m{background:var(--mult)} .pop.g{background:var(--gold);color:#222}
 @keyframes pop{0%{opacity:0;transform:translate(-50%,6px)}20%{opacity:1;transform:translate(-50%,-6px)}100%{opacity:0;transform:translate(-50%,-26px)}}
+
+/* Boutons */
 #sorters{display:flex;justify-content:center;gap:6px}
 .btn{border:0;border-radius:10px;padding:12px 10px;font-family:inherit;font-weight:800;font-size:15px;color:#fff;cursor:pointer}
 .btn:disabled{opacity:.35}
@@ -73,18 +128,26 @@ h1 span{color:var(--gold)}
 #controls{display:flex;gap:8px}
 #controls .btn{flex:1}
 .play{background:var(--chips)} .disc{background:var(--mult)} .goldb{background:var(--gold);color:#222} .ghost{background:rgba(255,255,255,.12)}
+
+/* Boutique */
 #shop h2{margin:0 0 4px;font-size:18px}
 .offers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.offer{background:rgba(0,0,0,.3);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px}
+.offer{background:rgba(0,0,0,.3);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px;border:2px solid var(--gold)}
 .offer .top{display:flex;align-items:center;gap:6px}
 .offer .ic{font-size:26px}
+.offer .tag{font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--gold)}
 .offer .nm{font-weight:800;font-size:13px;line-height:1.15}
 .offer .ds{font-size:12px;color:#dfe9e6;flex:1}
 .offer .btn{padding:8px;font-size:13px}
-.offer.sold{opacity:.4}
-.scroll{background:linear-gradient(160deg,#4a3a17,#2a210d)}
-.shopbar{display:flex;gap:8px;margin-top:10px}
+.offer.sold{opacity:.35;border-style:dashed}
+.offer.scroll{background:linear-gradient(160deg,#4a3a17,#2a210d);border-color:#e7c46a}
+.offer.charm{background:linear-gradient(160deg,#5a1d3a,#2e0f20);border-color:#ff9ad1}
+.offer.charm .tag{color:#ff9ad1}
+.reroll{width:100%;margin-top:10px;background:linear-gradient(90deg,#8a3ae8,#e8833a);font-size:16px}
+.shopbar{display:flex;gap:8px;margin-top:8px}
 .shopbar .btn{flex:1}
+
+/* Modales */
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
 #modal[hidden]{display:none}
 .box{background:#16322d;border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;max-width:420px;width:100%;max-height:85vh;overflow:auto}
@@ -100,11 +163,16 @@ table.lv td.c{color:#8fbaff;text-align:right} table.lv td.m{color:#ff9a9d;text-a
 </style>
 </head>
 <body>
+<svg id="garTop" class="garland top"></svg>
+<svg id="garBot" class="garland bot"></svg>
+<div id="flashFx"></div>
+
 <div id="app">
   <header>
-    <div class="hdr-left"><button class="iconbtn" id="btnQuit" title="Retour">‹</button><h1>Coup de <span>Maître</span></h1></div>
+    <div class="hdr-left"><button class="iconbtn hidden" id="btnQuit" title="Retour">‹</button><h1>Coup de <span>Maître</span></h1></div>
     <div class="hdr-right">
       <span class="pill money" id="money">$4</span>
+      <button class="iconbtn" id="btnMute" title="Son">🔊</button>
       <button class="iconbtn" id="btnLevels" title="Mains">♣</button>
       <button class="iconbtn" id="btnHelp" title="Règles">?</button>
     </div>
@@ -112,8 +180,11 @@ table.lv td.c{color:#8fbaff;text-align:right} table.lv td.m{color:#ff9a9d;text-a
 
   <section id="status" class="panel">
     <div class="row"><span id="defiName">Petit défi</span><span class="small" id="miseLbl">Mise 1/8</span></div>
-    <div class="row"><span class="small">Objectif <b id="target" style="color:#fff">300</b></span><span class="big" id="score">0</span></div>
-    <div class="bar"><div id="bar"></div></div>
+    <div class="duo">
+      <div class="goal"><div class="lbl">🎯 OBJECTIF</div><div class="num" id="target">300</div><div class="rew" id="reward">Récompense $3</div></div>
+      <div class="scorebox"><div class="lbl">SCORE</div><div id="scoreWrap"><span id="scoreScale"><span id="score">0</span></span></div></div>
+    </div>
+    <div class="bar" id="barBox"><div id="bar"></div></div>
     <div class="counters">
       <div class="counter h"><b id="handsLeft">4</b>Mains</div>
       <div class="counter d"><b id="discLeft">3</b>Défausses</div>
@@ -122,6 +193,7 @@ table.lv td.c{color:#8fbaff;text-align:right} table.lv td.m{color:#ff9a9d;text-a
   </section>
 
   <section id="atouts"></section>
+  <section id="charmes"></section>
 
   <div id="playZone">
     <section id="calc" class="panel">
@@ -147,10 +219,11 @@ table.lv td.c{color:#8fbaff;text-align:right} table.lv td.m{color:#ff9a9d;text-a
 <div id="modal" hidden><div class="box" id="modalBox"></div></div>
 
 <script>
-// ---------- Données ----------
+// =============== Données ===============
 const SUITS=['♠','♥','♣','♦'];
 const RLBL={11:'V',12:'D',13:'R',14:'A'};
 const rl=r=>RLBL[r]||String(r);
+const IN_APP=/coup-de-maitre\.html$/.test(location.pathname);
 const HANDS={
   haute:{n:'Carte haute',c:5,m:1,dc:10,dm:1},
   paire:{n:'Paire',c:12,m:2,dc:15,dm:1},
@@ -166,65 +239,167 @@ const BASE_T=[300,700,1600,4000,9000,18000,32000,55000];
 const DEFIS=['Petit défi','Grand défi','Défi du Maître'];
 const DEFI_MUL=[1,1.5,2];
 const DEFI_REWARD=[3,4,5];
-const MAX_ATOUTS=5, HAND_SIZE=8;
+const MAX_ATOUTS=5, MAX_CH=2;
 
+// Atouts : card(k,ctx,a) pour chaque carte qui compte, held(k,ctx,a) pour chaque carte restée en main,
+// hand(ctx,a) après les cartes, after(ctx,a) après le calcul, discard(cartes,a), start(a) début de défi, end(a) fin de défi (renvoie des $)
 const ATOUTS={
-  saltimbanque:{n:'Le Saltimbanque',i:'🎭',p:3,d:'+4 Multi',
-    hand:c=>{c.mult+=4;return['+4 Multi','m']}},
-  artichaut:{n:"Cœur d'artichaut",i:'💗',p:5,d:'Chaque ♥ marqué : +3 Multi',
-    card:(k,c)=>{if(k.s===1){c.mult+=3;return['+3 Multi','m']}}},
-  piquenique:{n:'Pique-nique',i:'🧺',p:5,d:'Chaque ♠ marqué : +25 Base',
-    card:(k,c)=>{if(k.s===0){c.chips+=25;return['+25','c']}}},
-  trefle:{n:'Trèfle porte-bonheur',i:'🍀',p:5,d:'Chaque ♣ marqué : +1 $',
-    card:k=>{if(k.s===2){G.money+=1;return['+1 $','g']}}},
-  vitrail:{n:'Le Vitrail',i:'🔷',p:5,d:'Chaque ♦ marqué : +10 Base et +2 Multi',
+  saltimbanque:{n:'Le Saltimbanque',i:'🎭',p:3,d:'+15 Base et +3 Multi',
+    hand:c=>{c.chips+=15;c.mult+=3;return['+15 / +3','m']}},
+  artichaut:{n:"Cœur d'artichaut",i:'💗',p:5,d:'Chaque ♥ qui compte : +12 Base et +1 Multi',
+    card:(k,c)=>{if(k.s===1){c.chips+=12;c.mult+=1;return['+12 / +1','m']}}},
+  piquenique:{n:'Pique-nique',i:'🧺',p:5,d:'Chaque ♠ qui compte : +20 Base',
+    card:(k,c)=>{if(k.s===0){c.chips+=20;return['+20','c']}}},
+  trefle:{n:'Trèfle porte-bonheur',i:'🍀',p:5,d:'Chaque ♣ qui compte : +1 $ (un ♣ joué qui ne fait pas partie de la combinaison ne rapporte rien)',
+    card:k=>{if(k.s===2){gain(1);return['+1 $','g']}}},
+  vitrail:{n:'Le Vitrail',i:'🔷',p:5,d:'Chaque ♦ qui compte : +10 Base et +2 Multi',
     card:(k,c)=>{if(k.s===3){c.chips+=10;c.mult+=2;return['+10 / +2','m']}}},
-  jumeaux:{n:'Les Jumeaux',i:'👯',p:4,d:'Si la main contient une Paire : +8 Multi',
-    hand:c=>{if(c.has.paire){c.mult+=8;return['+8 Multi','m']}}},
-  trio:{n:'Le Trio',i:'🎺',p:7,d:'Si la main contient un Brelan : ×2 Multi',
-    hand:c=>{if(c.has.brelan){c.mult*=2;return['×2 Multi','m']}}},
-  escalier:{n:"L'Escalier",i:'🪜',p:7,d:'Si la main contient une Suite : ×2,5 Multi',
-    hand:c=>{if(c.has.suite){c.mult*=2.5;return['×2,5 Multi','m']}}},
-  peintre:{n:'Le Peintre',i:'🎨',p:7,d:'Si la main contient une Couleur : ×2 Multi',
-    hand:c=>{if(c.has.couleur){c.mult*=2;return['×2 Multi','m']}}},
-  cour:{n:'La Cour',i:'👑',p:5,d:'Chaque figure (V, D, R) marquée : +30 Base',
-    card:(k,c)=>{if(k.r>=11&&k.r<=13){c.chips+=30;return['+30','c']}}},
-  fretin:{n:'Menu fretin',i:'🐟',p:5,d:'Chaque carte de 2 à 5 marquée : +4 Multi',
+  jumeaux:{n:'Les Jumeaux',i:'👯',p:4,d:'Si la main est exactement une Paire : +30 Base et +3 Multi',
+    hand:c=>{if(c.type==='paire'){c.chips+=30;c.mult+=3;return['+30 / +3','m']}}},
+  triade:{n:'La Triade',i:'🔺',p:5,d:'Si la main contient un Brelan : +40 Base',
+    hand:c=>{if(c.has.brelan){c.chips+=40;return['+40','c']}}},
+  escalier:{n:"L'Escalier",i:'🪜',p:5,d:'Si la main contient une Suite : +60 Base',
+    hand:c=>{if(c.has.suite){c.chips+=60;return['+60','c']}}},
+  peintre:{n:'Le Peintre',i:'🎨',p:6,d:'Si la main contient une Couleur : +2 Multi par carte qui compte',
+    hand:c=>{if(c.has.couleur){const v=2*c.scoring.length;c.mult+=v;return['+'+v+' Multi','m']}}},
+  cour:{n:'La Cour',i:'👑',p:5,d:'Chaque figure (V, D, R) qui compte : +15 Base et +1 Multi',
+    card:(k,c)=>{if(k.r>=11&&k.r<=13){c.chips+=15;c.mult+=1;return['+15 / +1','m']}}},
+  fretin:{n:'Menu fretin',i:'🐟',p:5,d:'Chaque carte de 2 à 5 qui compte : +4 Multi',
     card:(k,c)=>{if(k.r<=5){c.mult+=4;return['+4 Multi','m']}}},
-  tirelire:{n:'La Tirelire',i:'🐷',p:6,d:'+1 Multi par tranche de 3 $ possédés',
-    hand:c=>{const v=Math.floor(G.money/3);if(v){c.mult+=v;return['+'+v+' Multi','m']}}},
-  souffle:{n:'Dernier souffle',i:'🌬️',p:7,d:'×3 Multi sur la dernière main du défi',
-    hand:c=>{if(c.last){c.mult*=3;return['×3 Multi','m']}}},
-  econome:{n:"L'Économe",i:'🧮',p:5,d:'+20 Base par défausse restante',
-    hand:c=>{const v=G.discards*20;if(v){c.chips+=v;return['+'+v,'c']}}},
-  meute:{n:'La Meute',i:'🐺',p:6,d:'+3 Multi par Atout possédé',
-    hand:c=>{const v=G.atouts.length*3;c.mult+=v;return['+'+v+' Multi','m']}},
-  bourgeon:{n:'Le Bourgeon',i:'🌱',p:6,d:a=>'Gagne +1 Multi à chaque main jouée (actuel : +'+(a?a.v:0)+')',
-    hand:(c,a)=>{if(a.v){c.mult+=a.v;return['+'+a.v+' Multi','m']}},after:(c,a)=>{a.v++},val:a=>'+'+a.v},
-  ancien:{n:"L'Ancien",i:'🧙',p:8,d:'Chaque As marqué : ×1,5 Multi',
-    card:(k,c)=>{if(k.r===14){c.mult*=1.5;return['×1,5','m']}}},
-  banquier:{n:'Le Banquier',i:'🎩',p:5,d:'+3 $ à la fin de chaque défi gagné',end:()=>3},
-  minimaliste:{n:'Le Minimaliste',i:'◽',p:5,d:'Si 3 cartes ou moins sont jouées : +12 Multi',
-    hand:c=>{if(c.n<=3){c.mult+=12;return['+12 Multi','m']}}}
+  tirelire:{n:'La Tirelire',i:'🐷',p:6,d:'Si tu possèdes 20 $ ou plus : ×2 Multi',
+    hand:c=>{if(G.money>=20){c.mult*=2;return['×2 Multi','m']}}},
+  souffle:{n:'Dernier souffle',i:'🌬️',p:6,d:'Dernière main du défi : +25 Multi',
+    hand:c=>{if(c.last){c.mult+=25;return['+25 Multi','m']}}},
+  econome:{n:"L'Économe",i:'🧮',p:5,d:'+3 Multi par défausse restante',
+    hand:c=>{const v=G.discards*3;if(v){c.mult+=v;return['+'+v+' Multi','m']}}},
+  solitude:{n:'La Solitude',i:'🌙',p:5,d:"+15 Base par emplacement d'Atout vide",
+    hand:c=>{const v=(MAX_ATOUTS-G.atouts.length)*15;if(v){c.chips+=v;return['+'+v,'c']}}},
+  bourgeon:{n:'Le Bourgeon',i:'🌱',p:6,d:a=>'Gagne +1 Multi à chaque main contenant une Paire (actuel : +'+(a?a.v:0)+')',
+    hand:(c,a)=>{if(a.v){c.mult+=a.v;return['+'+a.v+' Multi','m']}},after:(c,a)=>{if(c.has.paire)a.v++},val:a=>'+'+a.v},
+  ancien:{n:"L'Ancien",i:'🧙',p:6,d:'Chaque As qui compte : +20 Base et +4 Multi',
+    card:(k,c)=>{if(k.r===14){c.chips+=20;c.mult+=4;return['+20 / +4','m']}}},
+  banquier:{n:'Le Banquier',i:'🎩',p:5,d:'Fin de défi : +1 $ de plus par main non jouée',end:()=>G.hands},
+  minimaliste:{n:'Le Minimaliste',i:'◽',p:5,d:'Si tu joues une seule carte : ×3 Multi',
+    hand:c=>{if(c.n===1){c.mult*=3;return['×3 Multi','m']}}},
+  echo:{n:"L'Écho",i:'🗣️',p:7,d:'La 1re carte qui compte est comptée deux fois'},
+  cloche:{n:'La Cloche',i:'🔔',p:5,d:'Chaque 10 qui compte est compté deux fois'},
+  page:{n:'Le Page',i:'🎒',p:5,d:'Chaque Valet resté en main : +30 Base',
+    held:(k,c)=>{if(k.r===11){c.chips+=30;return['+30','c']}}},
+  percepteur:{n:'Le Percepteur',i:'💰',p:5,d:'+1 $ à chaque défausse',discard:()=>{gain(1)}},
+  ferrailleur:{n:'Le Ferrailleur',i:'🔧',p:6,d:a=>'+2 Multi par carte défaussée pendant ce défi (actuel : +'+(a?a.v*2:0)+')',
+    start:a=>{a.v=0},discard:(cs,a)=>{a.v+=cs.length},
+    hand:(c,a)=>{if(a.v){const v=a.v*2;c.mult+=v;return['+'+v+' Multi','m']}},val:a=>'+'+a.v*2},
+  eclaireur:{n:"L'Éclaireur",i:'🔦',p:6,d:'1re main du défi : ×2 Multi',
+    hand:c=>{if(c.first){c.mult*=2;return['×2 Multi','m']}}},
+  fourmi:{n:'La Fourmi',i:'🐜',p:4,d:a=>'Gagne +10 Base à chaque Carte haute jouée (actuel : +'+(a?a.v:0)+')',
+    hand:(c,a)=>{if(a.v){c.chips+=a.v;return['+'+a.v,'c']}},after:(c,a)=>{if(c.type==='haute')a.v+=10},val:a=>'+'+a.v},
+  colosse:{n:'Le Colosse',i:'🗿',p:4,d:'+50 Base',hand:c=>{c.chips+=50;return['+50','c']}},
+  monochrome:{n:'Le Monochrome',i:'🌗',p:6,d:'Si au moins 3 cartes comptent et sont toutes rouges ou toutes noires : ×2 Multi',
+    hand:c=>{const red=c.scoring.map(k=>k.s%2===1);if(c.scoring.length>=3&&(red.every(x=>x)||red.every(x=>!x))){c.mult*=2;return['×2 Multi','m']}}},
+  numerologue:{n:'Le Numérologue',i:'🔢',p:5,d:'Chaque 7 qui compte : +7 Multi',
+    card:(k,c)=>{if(k.r===7){c.mult+=7;return['+7 Multi','m']}}},
+  geant:{n:'Le Géant',i:'🏔️',p:5,d:'Chaque Roi qui compte : +30 Base',
+    card:(k,c)=>{if(k.r===13){c.chips+=30;return['+30','c']}}},
+  parieur:{n:'Le Parieur',i:'🎰',p:6,d:'Une chance sur 3 : ×3 Multi',
+    hand:c=>{if(Math.random()<1/3){c.mult*=3;return['×3 Multi !','m']}return['Raté…','c']}},
+  avare:{n:"L'Avare",i:'🪙',p:6,d:'Plafond des intérêts doublé (10 $ max)'},
+  mecene:{n:'Le Mécène',i:'📚',p:5,d:'Les Parchemins coûtent 1 $'},
+  astrologue:{n:"L'Astrologue",i:'🔭',p:6,d:a=>'Gagne +2 Multi pour chaque Parchemin acheté (actuel : +'+(a?a.v:0)+')',
+    hand:(c,a)=>{if(a.v){c.mult+=a.v;return['+'+a.v+' Multi','m']}},val:a=>'+'+a.v},
+  marchand:{n:'Le Marchand',i:'🏪',p:4,d:'Les relances de la boutique coûtent 2 $ de moins'},
+  grandemain:{n:'La Grande Main',i:'🖐️',p:6,d:'+1 carte en main'},
+  stratege:{n:'Le Stratège',i:'♟️',p:5,d:'+2 défausses mais −1 main par défi'},
+  veteran:{n:'Le Vétéran',i:'🎖️',p:7,d:'+1 main par défi'},
+  diamantaire:{n:'Le Diamantaire',i:'💎',p:5,d:'Fin de défi : +1 $ par ♦ resté en main',end:()=>G.hand.filter(k=>k.s===3).length},
+  spirale:{n:'La Spirale',i:'🌀',p:8,d:a=>'Gagne ×0,25 Multi à chaque main contenant une Suite (actuel : ×'+fmtM(1+(a?a.v:0)*0.25)+')',
+    hand:(c,a)=>{if(a.v){const x=1+a.v*0.25;c.mult*=x;return['×'+fmtM(x)+' Multi','m']}},after:(c,a)=>{if(c.has.suite)a.v++},val:a=>'×'+fmtM(1+a.v*0.25)},
+  forgeron:{n:'Le Forgeron',i:'⚒️',p:6,d:a=>'Gagne +2 Multi à chaque main contenant un Brelan (actuel : +'+(a?a.v:0)+')',
+    hand:(c,a)=>{if(a.v){c.mult+=a.v;return['+'+a.v+' Multi','m']}},after:(c,a)=>{if(c.has.brelan)a.v+=2},val:a=>'+'+a.v},
+  alchimiste:{n:"L'Alchimiste",i:'⚗️',p:6,d:'Chaque carte améliorée (par un Charme) qui compte : +6 Multi',
+    card:(k,c)=>{if(k.enh){c.mult+=6;return['+6 Multi','m']}}},
+  voyante:{n:'La Voyante',i:'🔮',p:6,d:"Fin de défi : reçois un Charme au hasard (s'il reste de la place)",
+    end:()=>{if(G.charmes.length<MAX_CH)G.charmes.push(randomCharme());return 0}}
+};
+
+const ENH={
+  flamme:{n:'Ardente',i:'🔥',d:'+5 Multi quand elle compte'},
+  cristal:{n:'Cristal',i:'💠',d:'+35 Base quand elle compte'},
+  doree:{n:'Dorée',i:'🪙',d:'+2 $ quand elle compte'},
+  acier:{n:'Acier',i:'⛓️',d:'+25 Base si elle reste en main pendant le calcul'}
+};
+const CHARMES={
+  flamme:{n:'Charme de Flamme',i:'🔥',p:4,max:2,enh:'flamme',d:"Jusqu'à 2 cartes deviennent Ardentes : +5 Multi quand elles comptent"},
+  cristal:{n:'Charme de Cristal',i:'💠',p:4,max:2,enh:'cristal',d:"Jusqu'à 2 cartes deviennent Cristal : +35 Base quand elles comptent"},
+  or:{n:"Charme d'Or",i:'🪙',p:4,max:1,enh:'doree',d:'1 carte devient Dorée : +2 $ quand elle compte'},
+  acier:{n:"Charme d'Acier",i:'⛓️',p:4,max:2,enh:'acier',d:"Jusqu'à 2 cartes deviennent d'Acier : +25 Base si elles restent en main pendant le calcul"},
+  teinture:{n:c=>'Teinture '+SUITS[c.suit],i:'🧪',p:3,max:3,d:c=>"Jusqu'à 3 cartes passent en "+SUITS[c.suit],use:(cs,c)=>cs.forEach(k=>k.s=c.suit)},
+  elevation:{n:'Élévation',i:'⏫',p:3,max:3,d:"Jusqu'à 3 cartes gagnent +1 rang (l'As reste As)",use:cs=>cs.forEach(k=>{k.r=Math.min(14,k.r+1)})},
+  purge:{n:'Purge',i:'🗑️',p:3,max:2,d:"Détruit jusqu'à 2 cartes de ton paquet, pour de bon (paquet plus concentré)"}
 };
 const descOf=(id,a)=>{const d=ATOUTS[id].d;return typeof d==='function'?d(a):d};
 const sellOf=id=>Math.max(1,Math.floor(ATOUTS[id].p/2));
+const chName=c=>{const n=CHARMES[c.id].n;return typeof n==='function'?n(c):n};
+const chDesc=c=>{const d=CHARMES[c.id].d;return typeof d==='function'?d(c):d};
 
-// ---------- Utilitaires ----------
+// =============== Utilitaires ===============
 const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const fmt=n=>Math.floor(n).toLocaleString('fr-FR');
-const fmtM=m=>Number.isInteger(m)?String(m):(Math.round(m*10)/10).toString().replace('.',',');
+const fmtM=m=>Number.isInteger(m)?String(m):(Math.round(m*100)/100).toString().replace('.',',');
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let uidc=0;
-const fullDeck=()=>{const d=[];for(let s=0;s<4;s++)for(let r=2;r<=14;r++)d.push({id:++uidc,r,s});return d};
+const fullDeck=()=>{const d=[];for(let s=0;s<4;s++)for(let r=2;r<=14;r++)d.push({id:++uidc,r,s,enh:null});return d};
 const cardChips=c=>c.r===14?11:(c.r>=11?10:c.r);
 const lvlVals=k=>{const h=HANDS[k],l=G.levels[k];return{c:h.c+h.dc*(l-1),m:h.m+h.dm*(l-1)}};
+const has=id=>G.atouts.some(a=>a.id===id);
+const handSize=()=>8+(has('grandemain')?1:0);
+const maxHands=()=>4+(has('veteran')?1:0)-(has('stratege')?1:0);
+const maxDisc=()=>3+(has('stratege')?2:0);
+const scrollPrice=()=>has('mecene')?1:3;
+const rerollPrice=()=>Math.max(1,G.reroll-(has('marchand')?2:0));
+const randomCharme=()=>({uid:++uidc,id:pick(Object.keys(CHARMES)),suit:Math.floor(Math.random()*4)});
 function getBest(){try{return JSON.parse(localStorage.getItem('cdm_best')||'0')}catch(e){return 0}}
 function setBest(v){try{if(v>getBest())localStorage.setItem('cdm_best',JSON.stringify(v))}catch(e){}}
 
-// ---------- Évaluation des mains ----------
+// =============== Sons (synthétisés) ===============
+let AC=null,NB=null,muted=false;
+try{muted=localStorage.getItem('cdm_mute')==='1'}catch(e){}
+function ensureAudio(){
+  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();
+}
+function tone(f,d,type,vol,delay,f2){
+  if(muted||!AC)return;
+  const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
+  o.type=type||'triangle';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||.12,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+0.03);
+}
+function noise(d,vol,delay,freq,q){
+  if(muted||!AC)return;
+  if(!NB){NB=AC.createBuffer(1,AC.sampleRate*0.6,AC.sampleRate);const ch=NB.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1}
+  const t=AC.currentTime+(delay||0),s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=NB;f.type='bandpass';f.frequency.value=freq||3000;f.Q.value=q||1;
+  g.gain.setValueAtTime(vol||.2,t);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  s.connect(f).connect(g).connect(AC.destination);s.start(t);s.stop(t+d+0.03);
+}
+const sDeal=()=>{noise(.07,.4,0,2800,.8);tone(2100,.025,'square',.025)};
+const sSelect=()=>tone(1250,.04,'triangle',.07);
+const sPlay=()=>noise(.14,.35,0,1500,.7);
+const sChip=i=>tone(520*Math.pow(1.06,Math.min(i,24)),.07,'triangle',.12);
+const sMult=()=>{tone(330,.12,'sawtooth',.05);tone(660,.12,'square',.03)};
+const sCoin=()=>{tone(1318,.06,'square',.05);tone(1760,.22,'triangle',.09,.06)};
+const sBuy=()=>{tone(988,.07,'square',.05);tone(1318,.07,'square',.05,.07);tone(1976,.3,'triangle',.11,.14);noise(.25,.12,.14,6000,2)};
+const sSell=()=>{tone(880,.08,'triangle',.1);tone(587,.15,'triangle',.1,.08)};
+const sShuffle=()=>{for(let i=0;i<5;i++)noise(.05,.3,i*.05,2600,.8)};
+const sMagic=()=>[880,1175,1568,2093].forEach((f,i)=>tone(f,.2,'sine',.09,i*.06));
+const sTick=()=>tone(1500,.02,'square',.02);
+const sBoom=()=>{noise(.7,.6,0,350,.5);tone(140,.6,'sine',.35,0,40)};
+const sWin=()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.28,'triangle',.13,.25+i*.09));
+const sLose=()=>[392,330,262,196].forEach((f,i)=>tone(f,.32,'sawtooth',.05,i*.17));
+
+// =============== Évaluation des mains ===============
 function evaluate(cs){
   const cnt={};cs.forEach(c=>cnt[c.r]=(cnt[c.r]||0)+1);
   const groups=Object.entries(cnt).map(([r,n])=>({r:+r,n})).sort((a,b)=>b.n-a.n||b.r-a.r);
@@ -250,11 +425,11 @@ function evaluate(cs){
   return{type,scoring,has};
 }
 
-// ---------- État ----------
+// =============== État ===============
 let G;
 function newRun(){
-  G={mise:1,defi:0,money:4,atouts:[],levels:Object.fromEntries(Object.keys(HANDS).map(k=>[k,1])),
-     phase:'play',reroll:5,shop:null,busy:false,sort:'rank',sel:new Set(),hand:[],deck:[]};
+  G={mise:1,defi:0,money:4,atouts:[],charmes:[],levels:Object.fromEntries(Object.keys(HANDS).map(k=>[k,1])),
+     cards:fullDeck(),phase:'play',reroll:5,shop:null,busy:false,sort:'rank',sel:new Set(),hand:[],deck:[],justDealt:new Set(),lock:false};
   startDefi();
 }
 function target(){
@@ -262,43 +437,72 @@ function target(){
   return Math.round(base*DEFI_MUL[G.defi]);
 }
 function startDefi(){
-  G.deck=shuffle(fullDeck());G.hand=[];G.sel=new Set();
-  G.hands=4;G.discards=3;G.score=0;G.phase='play';G.busy=false;
-  drawCards();render();resetCalc();
+  G.deck=shuffle([...G.cards]);G.hand=[];G.sel=new Set();
+  G.hands=maxHands();G.discards=maxDisc();G.score=0;G.phase='play';G.busy=false;G.playedThisDefi=0;
+  G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.start)d.start(a)});
+  $('#score').className='';
+  drawCards();$('#table').innerHTML='';render();
 }
-function drawCards(){while(G.hand.length<HAND_SIZE&&G.deck.length)G.hand.push(G.deck.pop());sortHand()}
+function drawCards(){
+  while(G.hand.length<handSize()&&G.deck.length){const c=G.deck.pop();G.hand.push(c);G.justDealt.add(c.id)}
+  sortHand();
+}
 function sortHand(){
   if(G.sort==='rank')G.hand.sort((a,b)=>b.r-a.r||a.s-b.s);
   else G.hand.sort((a,b)=>a.s-b.s||b.r-a.r);
 }
+function gain(n){
+  G.money+=n;const m=$('#money');m.textContent='$'+G.money;
+  m.classList.remove('bump');void m.offsetWidth;m.classList.add('bump');pop(m,'+'+n+' $','g');sCoin();
+}
 
-// ---------- Rendu ----------
+// =============== Rendu ===============
 function cardEl(c){
   const d=document.createElement('div');
-  d.className='card'+((c.s===1||c.s===3)?' red':'');d.dataset.id=c.id;
-  d.innerHTML=`<span class="r">${rl(c.r)}</span><span class="s">${SUITS[c.s]}</span><span class="s2">${SUITS[c.s]}</span>`;
+  d.className='card'+((c.s===1||c.s===3)?' red':'')+(c.enh?' e-'+c.enh:'');d.dataset.id=c.id;
+  d.innerHTML=`<span class="r">${rl(c.r)}</span><span class="s">${SUITS[c.s]}</span><span class="s2">${SUITS[c.s]}</span>`+(c.enh?`<span class="eb">${ENH[c.enh].i}</span>`:'');
   return d;
 }
 function render(){
   $('#money').textContent='$'+G.money;
-  const boss=G.defi===2;
-  $('#defiName').textContent=DEFIS[G.defi];$('#defiName').classList.toggle('boss',boss);
+  const shop=G.phase==='shop';
+  $('#status').classList.toggle('hidden',shop);
+  $('#defiName').textContent=DEFIS[G.defi];$('#defiName').classList.toggle('boss',G.defi===2);
   $('#miseLbl').textContent='Mise '+G.mise+(G.mise<=8?'/8':' (infini)');
   $('#target').textContent=fmt(target());
-  $('#score').textContent=fmt(G.score);
-  $('#bar').style.width=Math.min(100,G.score/target()*100)+'%';
+  $('#reward').textContent='Récompense $'+DEFI_REWARD[G.defi];
+  updateScore();
   $('#handsLeft').textContent=G.hands;$('#discLeft').textContent=G.discards;$('#deckLeft').textContent=G.deck.length;
-  renderAtouts();
-  const shop=G.phase==='shop';
+  $('#btnMute').textContent=muted?'🔇':'🔊';
+  renderAtouts();renderCharmes();
   $('#playZone').classList.toggle('hidden',shop);$('#shop').classList.toggle('hidden',!shop);
   if(shop){renderShop();return}
-  const h=$('#hand');h.innerHTML='';
-  G.hand.forEach(c=>{const e=cardEl(c);if(G.sel.has(c.id))e.classList.add('sel');e.onclick=()=>toggle(c.id);h.appendChild(e)});
+  const h=$('#hand');h.innerHTML='';h.classList.toggle('n8',handSize()<=8);
+  let di=0;
+  G.hand.forEach(c=>{
+    const e=cardEl(c);if(G.sel.has(c.id))e.classList.add('sel');
+    if(G.justDealt.has(c.id)){const d=di++*70;e.classList.add('deal');e.style.animationDelay=d+'ms';setTimeout(sDeal,d)}
+    e.onclick=()=>toggle(c.id);h.appendChild(e);
+  });
+  G.justDealt.clear();
   $('#btnPlay').disabled=G.busy||!G.sel.size||G.hands<=0;
   $('#btnDiscard').disabled=G.busy||!G.sel.size||G.discards<=0;
   $('#btnPlay').textContent='Jouer'+(G.sel.size?' ('+G.sel.size+')':'');
   $('#btnDiscard').textContent='Défausser'+(G.discards?' ('+G.discards+')':'');
   if(!G.busy){preview();if(!$('#table').children.length)$('#table').innerHTML='<div class="hint">Sélectionne jusqu’à 5 cartes</div>'}
+}
+function updateScore(){
+  const p=G.score/target();
+  $('#score').textContent=fmt(G.score);
+  $('#bar').style.width=Math.min(100,p*100)+'%';
+  const s=1+0.6*Math.pow(Math.min(1,p),2);
+  $('#scoreScale').style.transform='scale('+s.toFixed(3)+')';
+  const sc=$('#score');
+  if(!sc.classList.contains('boom')){
+    sc.classList.toggle('warm',p>=0.5&&p<0.85);
+    sc.classList.toggle('hot',p>=0.85&&p<1);
+  }
+  $('#barBox').classList.toggle('hot',p>=0.85&&p<1);
 }
 function renderAtouts(){
   const w=$('#atouts');w.innerHTML='';
@@ -312,6 +516,15 @@ function renderAtouts(){
     w.appendChild(s);
   }
 }
+function renderCharmes(){
+  const w=$('#charmes');w.innerHTML='<span class="lbl">Charmes</span>';
+  for(let i=0;i<MAX_CH;i++){
+    const c=G.charmes[i];const s=document.createElement('div');
+    if(c){s.className='chslot full';s.textContent=CHARMES[c.id].i+' '+chName(c);s.onclick=()=>charmeInfo(c)}
+    else{s.className='chslot';s.innerHTML='<span class="small">vide</span>'}
+    w.appendChild(s);
+  }
+}
 function preview(){
   const cs=G.hand.filter(c=>G.sel.has(c.id));
   $('#total').textContent='';
@@ -320,158 +533,254 @@ function preview(){
   $('#handName').innerHTML=HANDS[ev.type].n+' <span class="lv">niv. '+G.levels[ev.type]+'</span>';
   $('#chips').textContent=v.c;$('#mult').textContent=v.m;
 }
-function resetCalc(){$('#table').innerHTML='';render()}
-function setCalc(ctx,bumpWhich){
+function setCalc(ctx,which){
   $('#chips').textContent=fmt(ctx.chips);$('#mult').textContent=fmtM(ctx.mult);
-  if(bumpWhich){const el=$(bumpWhich==='c'?'#chips':'#mult');el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
+  if(which==='c'||which==='m'){const el=$(which==='c'?'#chips':'#mult');el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
 }
 function pop(el,txt,cls){
   if(!el)return;const p=document.createElement('span');p.className='pop '+(cls||'');p.textContent=txt;
   el.appendChild(p);setTimeout(()=>p.remove(),950);
 }
-function atoutEl(uid){return document.querySelector(`.atout[data-uid="${uid}"]`)}
-
-// ---------- Actions ----------
-function toggle(id){
-  if(G.busy)return;
-  if(G.sel.has(id))G.sel.delete(id);else if(G.sel.size<5)G.sel.add(id);
-  $('#table').innerHTML='';render();
-}
-function discard(){
-  if(G.busy||!G.sel.size||G.discards<=0)return;
-  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.discards--;
-  drawCards();$('#table').innerHTML='';render();
-}
-async function play(){
-  if(G.busy||!G.sel.size||G.hands<=0)return;
-  G.busy=true;
-  const cards=G.hand.filter(c=>G.sel.has(c.id));
-  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.hands--;
-  const ev=evaluate(cards),v=lvlVals(ev.type);
-  const ctx={chips:v.c,mult:v.m,type:ev.type,has:ev.has,n:cards.length,last:G.hands===0};
-  // table
-  const t=$('#table');t.innerHTML='';const els={};
-  const scoringIds=new Set(ev.scoring.map(c=>c.id));
-  cards.forEach(c=>{const e=cardEl(c);e.classList.add(scoringIds.has(c.id)?'score':'dim');els[c.id]=e;t.appendChild(e)});
-  render();
-  $('#handName').innerHTML=HANDS[ev.type].n+' <span class="lv">niv. '+G.levels[ev.type]+'</span>';
-  setCalc(ctx);
-  await sleep(450);
-  for(const c of cards){
-    if(!scoringIds.has(c.id))continue;
-    const ch=cardChips(c);ctx.chips+=ch;pop(els[c.id],'+'+ch,'c');setCalc(ctx,'c');await sleep(280);
-    for(const a of G.atouts){
-      const d=ATOUTS[a.id];if(!d.card)continue;
-      const r=d.card(c,ctx,a);
-      if(r){pop(els[c.id],r[0],r[1]);flash(a.uid);setCalc(ctx,r[1]==='c'?'c':'m');$('#money').textContent='$'+G.money;await sleep(280)}
-    }
-  }
-  for(const a of G.atouts){
-    const d=ATOUTS[a.id];if(!d.hand)continue;
-    const r=d.hand(ctx,a);
-    if(r){flash(a.uid,r);setCalc(ctx,r[1]==='c'?'c':'m');await sleep(330)}
-  }
-  G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.after)d.after(ctx,a)});
-  const total=Math.floor(ctx.chips*ctx.mult);
-  $('#total').textContent='= '+fmt(total);
-  await sleep(350);
-  const from=G.score,to=G.score+total,steps=18;
-  for(let i=1;i<=steps;i++){G.score=Math.floor(from+(to-from)*i/steps);$('#score').textContent=fmt(G.score);$('#bar').style.width=Math.min(100,G.score/target()*100)+'%';await sleep(28)}
-  G.score=to;
-  await sleep(500);
-  t.innerHTML='';$('#total').textContent='';
-  if(G.score>=target()){winDefi();return}
-  if(G.hands<=0){gameOver();return}
-  drawCards();G.busy=false;render();
-}
+const atoutEl=uid=>document.querySelector(`.atout[data-uid="${uid}"]`);
+const handEl=id=>document.querySelector(`#hand .card[data-id="${id}"]`);
 function flash(uid,r){
   const el=atoutEl(uid);if(!el)return;
   el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
   if(r)pop(el,r[0],r[1]);
 }
+function sfx(cls,i){if(cls==='m')sMult();else if(cls==='c')sChip(i)}
 
-// ---------- Fin de défi / boutique ----------
+// =============== Guirlande ===============
+function buildGarland(){
+  const W=Math.max(320,window.innerWidth),H=36;
+  const cols=['#ffd23f','#ff4d6d','#4dd6ff','#7cff6b','#ff9f1c','#c77dff'];
+  ['#garTop','#garBot'].forEach(sel=>{
+    const svg=$(sel);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const spans=Math.max(3,Math.round(W/110)),sw=W/spans;
+    let d='M0 3';for(let i=0;i<spans;i++){const x0=i*sw;d+=` Q ${x0+sw/2} ${H*0.85} ${x0+sw} 3`}
+    svg.innerHTML=`<path d="${d}" fill="none" stroke="#1a1a1a" stroke-width="2"/>`;
+    const path=svg.querySelector('path'),L=path.getTotalLength(),n=Math.floor(L/24);
+    let out='';
+    for(let i=1;i<n;i++){
+      const p=path.getPointAtLength(i*L/n),col=cols[i%cols.length];
+      out+=`<g class="bulb${i%2?' b2':''}"><circle cx="${p.x}" cy="${p.y+7}" r="9" fill="${col}" opacity=".3"/><rect x="${p.x-2.5}" y="${p.y}" width="5" height="4" rx="1" fill="#444"/><circle cx="${p.x}" cy="${p.y+8}" r="4.5" fill="${col}"/></g>`;
+    }
+    svg.insertAdjacentHTML('beforeend',out);
+  });
+}
+function garlandFast(ms){document.querySelectorAll('.garland').forEach(g=>g.classList.add('fast'));setTimeout(()=>document.querySelectorAll('.garland').forEach(g=>g.classList.remove('fast')),ms)}
+
+// =============== Effets de victoire ===============
+async function boomFx(){
+  const sc=$('#score');sc.classList.remove('warm','hot');sc.classList.add('boom');$('#barBox').classList.remove('hot');
+  sBoom();garlandFast(2200);
+  const f=$('#flashFx');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');
+  const r=sc.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const cols=['#ffd23f','#ff4d6d','#4dd6ff','#7cff6b','#ff9f1c','#fff'];
+  for(let i=0;i<40;i++){
+    const s=document.createElement('div');s.className='spark';
+    const ang=Math.random()*Math.PI*2,dist=70+Math.random()*170;
+    s.style.left=cx+'px';s.style.top=cy+'px';s.style.background=pick(cols);
+    s.style.setProperty('--dx',Math.cos(ang)*dist+'px');s.style.setProperty('--dy',Math.sin(ang)*dist+'px');
+    document.body.appendChild(s);setTimeout(()=>s.remove(),1000);
+  }
+  await sleep(900);sc.classList.remove('boom');
+}
+
+// =============== Actions ===============
+function toggle(id){
+  if(G.busy)return;ensureAudio();
+  if(G.sel.has(id))G.sel.delete(id);else if(G.sel.size<5)G.sel.add(id);else return;
+  sSelect();$('#table').innerHTML='';render();
+}
+function discard(){
+  if(G.busy||!G.sel.size||G.discards<=0)return;
+  const cs=G.hand.filter(c=>G.sel.has(c.id));
+  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.discards--;
+  G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.discard){d.discard(cs,a);flash(a.uid)}});
+  drawCards();$('#table').innerHTML='';render();
+}
+async function play(){
+  if(G.busy||!G.sel.size||G.hands<=0)return;
+  G.busy=true;ensureAudio();
+  const cards=G.hand.filter(c=>G.sel.has(c.id));
+  G.hand=G.hand.filter(c=>!G.sel.has(c.id));G.sel.clear();G.hands--;
+  const ev=evaluate(cards),v=lvlVals(ev.type);
+  const ctx={chips:v.c,mult:v.m,type:ev.type,has:ev.has,n:cards.length,last:G.hands===0,first:G.playedThisDefi===0,scoring:ev.scoring};
+  G.playedThisDefi++;
+  const t=$('#table');t.innerHTML='';const els={};
+  const sIds=new Set(ev.scoring.map(c=>c.id));
+  cards.forEach(c=>{const e=cardEl(c);e.classList.add(sIds.has(c.id)?'score':'dim');els[c.id]=e;t.appendChild(e)});
+  render();
+  $('#handName').innerHTML=HANDS[ev.type].n+' <span class="lv">niv. '+G.levels[ev.type]+'</span>';
+  setCalc(ctx);sPlay();
+  await sleep(420);
+  let idx=0,step=0;
+  // 1) Cartes qui comptent
+  for(const c of cards){
+    if(!sIds.has(c.id))continue;
+    const reps=1+((has('echo')&&idx===0)?1:0)+((has('cloche')&&c.r===10)?1:0);
+    idx++;
+    for(let r=0;r<reps;r++){
+      if(r>0){pop(els[c.id],'Encore !','g');await sleep(240)}
+      const ch=cardChips(c);ctx.chips+=ch;pop(els[c.id],'+'+ch,'c');setCalc(ctx,'c');sChip(step++);await sleep(260);
+      if(c.enh==='flamme'){ctx.mult+=5;pop(els[c.id],'+5 Multi','m');setCalc(ctx,'m');sMult();await sleep(240)}
+      if(c.enh==='cristal'){ctx.chips+=35;pop(els[c.id],'+35','c');setCalc(ctx,'c');sChip(step++);await sleep(240)}
+      if(c.enh==='doree'){gain(2);pop(els[c.id],'+2 $','g');await sleep(240)}
+      for(const a of G.atouts){
+        const d=ATOUTS[a.id];if(!d.card)continue;
+        const res=d.card(c,ctx,a);
+        if(res){pop(els[c.id],res[0],res[1]);flash(a.uid);setCalc(ctx,res[1]);sfx(res[1],step++);await sleep(260)}
+      }
+    }
+  }
+  // 2) Cartes restées en main
+  for(const c of G.hand){
+    const he=handEl(c.id);
+    if(c.enh==='acier'){ctx.chips+=25;pop(he,'+25','c');setCalc(ctx,'c');sChip(step++);await sleep(240)}
+    for(const a of G.atouts){
+      const d=ATOUTS[a.id];if(!d.held)continue;
+      const res=d.held(c,ctx,a);
+      if(res){pop(he,res[0],res[1]);flash(a.uid);setCalc(ctx,res[1]);sfx(res[1],step++);await sleep(260)}
+    }
+  }
+  // 3) Atouts globaux, de gauche à droite
+  for(const a of G.atouts){
+    const d=ATOUTS[a.id];if(!d.hand)continue;
+    const res=d.hand(ctx,a);
+    if(res){flash(a.uid,res);setCalc(ctx,res[1]);sfx(res[1],step++);await sleep(330)}
+  }
+  G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.after)d.after(ctx,a)});
+  renderAtouts();
+  const total=Math.floor(ctx.chips*ctx.mult);
+  $('#total').textContent='= '+fmt(total);
+  await sleep(350);
+  const from=G.score,to=G.score+total,steps=22;
+  for(let i=1;i<=steps;i++){G.score=Math.floor(from+(to-from)*i/steps);updateScore();if(i%2)sTick();await sleep(30)}
+  G.score=to;updateScore();
+  await sleep(450);
+  t.innerHTML='';$('#total').textContent='';
+  if(G.score>=target()){await boomFx();winDefi();return}
+  if(G.hands<=0){gameOver();return}
+  drawCards();G.busy=false;render();
+}
+
+// =============== Fin de défi / boutique ===============
 function winDefi(){
   const base=DEFI_REWARD[G.defi];
-  const interest=Math.min(5,Math.floor(G.money/5));
+  const cap=has('avare')?10:5;
+  const interest=Math.min(cap,Math.floor(G.money/5));
   const hb=G.hands;
-  let extra=0;G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.end)extra+=d.end(a)});
+  let extra=0;G.atouts.forEach(a=>{const d=ATOUTS[a.id];if(d.end)extra+=d.end(a)||0});
   const tot=base+interest+hb+extra;G.money+=tot;G.busy=false;
   const finalWin=G.mise===8&&G.defi===2;
   setBest(G.mise*3+G.defi+1);
-  let html=`<h3>${DEFIS[G.defi]} réussi ! 🎉</h3><p>Score ${fmt(G.score)} / ${fmt(target())}</p>
+  sWin();
+  let html=`<h3>${finalWin?'Victoire ! 🏆':DEFIS[G.defi]+' réussi ! 🎉'}</h3>`+(finalWin?'<p>Tu as battu le Défi du Maître de la Mise 8. Coup de maître !</p>':'')+
+    `<p>Score ${fmt(G.score)} / ${fmt(target())}</p>
     <div class="sumrow"><span>Récompense du défi</span><b>+$${base}</b></div>
     <div class="sumrow"><span>Mains restantes (${hb})</span><b>+$${hb}</b></div>
-    <div class="sumrow"><span>Intérêts (1 $ par 5 $, max 5)</span><b>+$${interest}</b></div>`+
+    <div class="sumrow"><span>Intérêts (1 $ par 5 $, max ${cap})</span><b>+$${interest}</b></div>`+
     (extra?`<div class="sumrow"><span>Atouts</span><b>+$${extra}</b></div>`:'')+
     `<div class="sumrow"><span><b>Total</b></span><b style="color:var(--gold)">+$${tot}</b></div>`;
-  if(finalWin){
-    html=`<h3>Victoire ! 🏆</h3><p>Tu as battu le Défi du Maître de la Mise 8. Coup de maître !</p>`+html.replace(/<h3>.*?<\/h3>/,'');
-    modal(html,[{t:'Nouvelle partie',c:'ghost',f:()=>{closeModal();newRun()}},{t:'Continuer (infini)',c:'goldb',f:()=>{closeModal();openShop()}}]);
-  }else modal(html,[{t:'Boutique →',c:'goldb',f:()=>{closeModal();openShop()}}]);
+  if(finalWin)modal(html,[{t:'Nouvelle partie',c:'ghost',f:()=>{closeModal();newRun()}},{t:'Continuer (infini)',c:'goldb',f:()=>{closeModal();openShop()}}],true);
+  else modal(html,[{t:'Boutique →',c:'goldb',f:()=>{closeModal();openShop()}}],true);
   render();
 }
 function gameOver(){
-  G.busy=false;G.phase='over';
+  G.busy=false;G.phase='over';sLose();
   const best=getBest();
   modal(`<h3>Partie terminée</h3><p>Le ${DEFIS[G.defi]} de la Mise ${G.mise} t'a eu : ${fmt(G.score)} / ${fmt(target())}.</p>
     <p class="small">Record : ${best?('Mise '+Math.ceil(best/3)):'—'}</p>`,
-    [{t:'Rejouer',c:'goldb',f:()=>{closeModal();newRun()}}]);
+    [{t:'Rejouer',c:'goldb',f:()=>{closeModal();newRun()}}],true);
   render();
 }
 function rollShop(){
   const owned=new Set(G.atouts.map(a=>a.id));
-  const pool=Object.keys(ATOUTS).filter(k=>!owned.has(k));
-  shuffle(pool);
-  G.shop={atouts:pool.slice(0,2),scrolls:[pick(Object.keys(HANDS)),pick(Object.keys(HANDS))]};
+  const pool=shuffle(Object.keys(ATOUTS).filter(k=>!owned.has(k)));
+  G.shop={atouts:pool.slice(0,2),scroll:pick(Object.keys(HANDS)),charme:randomCharme()};
 }
 function openShop(){G.phase='shop';G.reroll=5;rollShop();render()}
 function renderShop(){
   const s=$('#shop');
+  const full=G.atouts.length>=MAX_ATOUTS;
   let h=`<h2>Boutique <span class="money" style="float:right">$${G.money}</span></h2>
-    <div class="small">Atouts : ${G.atouts.length}/${MAX_ATOUTS} · touche un Atout en haut pour le vendre</div><div class="offers">`;
+    <div class="small">Atouts ${G.atouts.length}/${MAX_ATOUTS} · Charmes ${G.charmes.length}/${MAX_CH} · touche un Atout ou un Charme en haut pour le vendre</div><div class="offers">`;
   G.shop.atouts.forEach((id,i)=>{
     if(!id){h+=`<div class="offer sold"><div class="nm">Vendu</div></div>`;return}
-    const d=ATOUTS[id],ok=G.money>=d.p&&G.atouts.length<MAX_ATOUTS;
-    h+=`<div class="offer"><div class="top"><span class="ic">${d.i}</span><span class="nm">${d.n}</span></div>
-      <div class="ds">${descOf(id,{v:0})}</div><button class="btn goldb" data-ba="${i}" ${ok?'':'disabled'}>Acheter $${d.p}</button></div>`;
+    const d=ATOUTS[id],ok=G.money>=d.p&&!full;
+    h+=`<div class="offer"><div class="tag">ATOUT</div><div class="top"><span class="ic">${d.i}</span><span class="nm">${d.n}</span></div>
+      <div class="ds">${descOf(id,{v:0})}</div><button class="btn goldb" data-ba="${i}" ${ok?'':'disabled'}>${full?'Plus de place':'Acheter $'+d.p}</button></div>`;
   });
-  G.shop.scrolls.forEach((k,i)=>{
-    if(!k){h+=`<div class="offer sold scroll"><div class="nm">Vendu</div></div>`;return}
-    const hd=HANDS[k],ok=G.money>=3;
-    h+=`<div class="offer scroll"><div class="top"><span class="ic">📜</span><span class="nm">Parchemin : ${hd.n}</span></div>
+  const k=G.shop.scroll;
+  if(!k)h+=`<div class="offer sold scroll"><div class="nm">Vendu</div></div>`;
+  else{const hd=HANDS[k],pr=scrollPrice();
+    h+=`<div class="offer scroll"><div class="tag">PARCHEMIN</div><div class="top"><span class="ic">📜</span><span class="nm">${hd.n}</span></div>
       <div class="ds">${hd.n} passe au niveau ${G.levels[k]+1} (+${hd.dc} Base, +${hd.dm} Multi)</div>
-      <button class="btn goldb" data-bs="${i}" ${ok?'':'disabled'}>Acheter $3</button></div>`;
-  });
-  h+=`</div><div class="shopbar"><button class="btn ghost" id="btnReroll" ${G.money>=G.reroll?'':'disabled'}>Relancer $${G.reroll}</button>
-    <button class="btn play" id="btnNext">Défi suivant →</button></div>`;
+      <button class="btn goldb" id="buyScroll" ${G.money>=pr?'':'disabled'}>Acheter $${pr}</button></div>`}
+  const ch=G.shop.charme;
+  if(!ch)h+=`<div class="offer sold charm"><div class="nm">Vendu</div></div>`;
+  else{const d=CHARMES[ch.id],chFull=G.charmes.length>=MAX_CH;
+    h+=`<div class="offer charm"><div class="tag">CHARME</div><div class="top"><span class="ic">${d.i}</span><span class="nm">${chName(ch)}</span></div>
+      <div class="ds">${chDesc(ch)}</div>
+      <button class="btn goldb" id="buyCharme" ${G.money>=d.p&&!chFull?'':'disabled'}>${chFull?'Plus de place':'Acheter $'+d.p}</button></div>`}
+  const rp=rerollPrice();
+  h+=`</div><button class="btn reroll" id="btnReroll" ${G.money>=rp?'':'disabled'}>🔄 Changer toutes les offres — $${rp}</button>
+    <div class="shopbar"><button class="btn play" id="btnNext">Défi suivant →</button></div>`;
   s.innerHTML=h;
   s.querySelectorAll('[data-ba]').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.ba,id=G.shop.atouts[i],d=ATOUTS[id];
     if(G.money<d.p||G.atouts.length>=MAX_ATOUTS)return;
-    G.money-=d.p;G.atouts.push({uid:++uidc,id,v:0});G.shop.atouts[i]=null;render();
+    G.money-=d.p;G.atouts.push({uid:++uidc,id,v:0});G.shop.atouts[i]=null;sBuy();render();
   });
-  s.querySelectorAll('[data-bs]').forEach(b=>b.onclick=()=>{
-    const i=+b.dataset.bs,k=G.shop.scrolls[i];if(G.money<3)return;
-    G.money-=3;G.levels[k]++;G.shop.scrolls[i]=null;render();
-  });
-  $('#btnReroll').onclick=()=>{if(G.money<G.reroll)return;G.money-=G.reroll;G.reroll++;rollShop();render()};
+  const bs=$('#buyScroll');if(bs)bs.onclick=()=>{
+    const pr=scrollPrice();if(G.money<pr)return;
+    G.money-=pr;G.levels[G.shop.scroll]++;G.shop.scroll=null;
+    G.atouts.forEach(a=>{if(a.id==='astrologue')a.v+=2});
+    sBuy();render();
+  };
+  const bc=$('#buyCharme');if(bc)bc.onclick=()=>{
+    const c=G.shop.charme,d=CHARMES[c.id];if(G.money<d.p||G.charmes.length>=MAX_CH)return;
+    G.money-=d.p;G.charmes.push(c);G.shop.charme=null;sBuy();render();
+  };
+  $('#btnReroll').onclick=()=>{const p=rerollPrice();if(G.money<p)return;G.money-=p;G.reroll++;rollShop();sShuffle();render()};
   $('#btnNext').onclick=()=>{G.defi++;if(G.defi>2){G.defi=0;G.mise++}startDefi()};
 }
 
-// ---------- Modales ----------
-function modal(html,btns){
+// =============== Modales ===============
+function modal(html,btns,lock){
+  G.lock=!!lock;
   const b=$('#modalBox');b.innerHTML=html+'<div class="btns"></div>';
   const w=b.querySelector('.btns');
   (btns||[{t:'OK',c:'ghost',f:closeModal}]).forEach(x=>{const e=document.createElement('button');e.className='btn '+x.c;e.textContent=x.t;e.onclick=x.f;w.appendChild(e)});
   $('#modal').hidden=false;
 }
-function closeModal(){$('#modal').hidden=true}
+function closeModal(){$('#modal').hidden=true;G.lock=false}
 function atoutInfo(a){
   const d=ATOUTS[a.id],canSell=!G.busy&&G.phase!=='over';
   modal(`<h3>${d.i} ${d.n}</h3><p>${descOf(a.id,a)}</p><p class="small">Revente : $${sellOf(a.id)}</p>`,
     [{t:'Fermer',c:'ghost',f:closeModal}].concat(canSell?[{t:'Vendre +$'+sellOf(a.id),c:'disc',f:()=>{
-      G.money+=sellOf(a.id);G.atouts=G.atouts.filter(x=>x.uid!==a.uid);closeModal();render()}}]:[]));
+      G.money+=sellOf(a.id);G.atouts=G.atouts.filter(x=>x.uid!==a.uid);sSell();closeModal();
+      if(G.phase==='play'){G.hands=Math.min(G.hands,maxHands());drawCards()}render()}}]:[]));
+}
+function charmeInfo(c){
+  const d=CHARMES[c.id],inPlay=G.phase==='play'&&!G.busy,n=G.sel.size,ok=inPlay&&n>=1&&n<=d.max;
+  const hint=!inPlay?'Utilisable pendant un défi, sur les cartes de ta main.':ok?`${n} carte(s) sélectionnée(s) : prêt.`:`Sélectionne de 1 à ${d.max} carte(s) dans ta main, puis touche à nouveau ce Charme.`;
+  const btns=[{t:'Fermer',c:'ghost',f:closeModal}];
+  if(!G.busy&&G.phase!=='over')btns.push({t:'Vendre +$1',c:'disc',f:()=>{G.money+=1;G.charmes=G.charmes.filter(x=>x.uid!==c.uid);sSell();closeModal();render()}});
+  if(ok)btns.push({t:'Utiliser',c:'goldb',f:()=>useCharme(c)});
+  modal(`<h3>${d.i} ${chName(c)}</h3><p>${chDesc(c)}</p><p class="small">${hint}</p>`,btns);
+}
+function useCharme(c){
+  const d=CHARMES[c.id],cs=G.hand.filter(k=>G.sel.has(k.id));
+  if(!cs.length||cs.length>d.max)return;
+  if(c.id==='purge'){
+    const ids=new Set(cs.map(k=>k.id));
+    G.cards=G.cards.filter(k=>!ids.has(k.id));G.hand=G.hand.filter(k=>!ids.has(k.id));drawCards();
+  }else if(d.enh)cs.forEach(k=>k.enh=d.enh);
+  else d.use(cs,c);
+  G.charmes=G.charmes.filter(x=>x.uid!==c.uid);G.sel.clear();sortHand();
+  sMagic();closeModal();$('#table').innerHTML='';render();
 }
 function showLevels(){
   let h='<h3>Mains de poker</h3><table class="lv">';
@@ -482,21 +791,26 @@ function showLevels(){
 function showHelp(){
   modal(`<h3>Comment jouer</h3>
   <p>Chaque défi a un <b>objectif</b> de points. Tu as <b>4 mains</b> et <b>3 défausses</b> pour l'atteindre.</p>
-  <p>Sélectionne jusqu'à 5 cartes et joue une main de poker. Score = <b style="color:#8fbaff">Base</b> × <b style="color:#ff9a9d">Multi</b>. Les cartes qui comptent ajoutent leur valeur à la Base (figures 10, As 11).</p>
+  <p>Sélectionne jusqu'à 5 cartes et joue une main de poker. Score = <b style="color:#8fbaff">Base</b> × <b style="color:#ff9a9d">Multi</b>. Seules les cartes qui forment la combinaison <b>comptent</b> (entourées de bleu) : elles ajoutent leur valeur à la Base (figures 10, As 11).</p>
   <p>Chaque Mise comporte 3 défis : Petit, Grand, puis le Défi du Maître. Bats la <b>Mise 8</b> pour gagner.</p>
-  <p>Entre les défis, la <b>boutique</b> propose des <b>Atouts</b> (bonus permanents, 5 max, l'ordre compte : de gauche à droite) et des <b>Parchemins</b> qui améliorent un type de main.</p>
+  <p>La <b>boutique</b> propose des <b>Atouts</b> (bonus permanents, 5 max, déclenchés de gauche à droite), des <b>Parchemins</b> (améliorent un type de main) et des <b>Charmes</b> (2 max, à utiliser pendant un défi sur des cartes sélectionnées : améliorations 🔥 💠 🪙 ⛓️, changement d'enseigne, de rang, ou destruction). Le bouton 🔄 change toutes les offres.</p>
   <p>Argent : récompense du défi + 1 $ par main non jouée + 1 $ d'intérêt par tranche de 5 $ (max 5).</p>`);
 }
 
-// ---------- Init ----------
+// =============== Init ===============
 $('#btnPlay').onclick=play;
 $('#btnDiscard').onclick=discard;
 $('#sortRank').onclick=()=>{if(G.busy)return;G.sort='rank';sortHand();render()};
 $('#sortSuit').onclick=()=>{if(G.busy)return;G.sort='suit';sortHand();render()};
 $('#btnLevels').onclick=showLevels;
 $('#btnHelp').onclick=showHelp;
-$('#btnQuit').onclick=()=>{if(G.busy)return;modal('<h3>Quitter la partie ?</h3><p>La partie en cours sera perdue.</p>',[{t:'Rester',c:'ghost',f:closeModal},{t:'Quitter',c:'disc',f:()=>{location.href='index.html'}}])};
-$('#modal').onclick=e=>{if(e.target.id==='modal'&&G.phase!=='over'&&!$('#modalBox .goldb'))closeModal()};
+$('#btnMute').onclick=()=>{muted=!muted;try{localStorage.setItem('cdm_mute',muted?'1':'0')}catch(e){}ensureAudio();render()};
+if(IN_APP){$('#btnQuit').classList.remove('hidden');
+  $('#btnQuit').onclick=()=>{if(G.busy)return;modal('<h3>Quitter la partie ?</h3><p>La partie en cours sera perdue.</p>',[{t:'Rester',c:'ghost',f:closeModal},{t:'Quitter',c:'disc',f:()=>{location.href='index.html'}}])}}
+$('#modal').onclick=e=>{if(e.target.id==='modal'&&!G.lock)closeModal()};
+document.addEventListener('pointerdown',ensureAudio);
+window.addEventListener('resize',buildGarland);
+buildGarland();
 newRun();
 </script>
 </body>
