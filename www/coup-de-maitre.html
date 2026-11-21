@@ -19,13 +19,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 #frame{position:fixed;top:calc(3px + env(safe-area-inset-top));bottom:calc(3px + env(safe-area-inset-bottom));left:calc(3px + env(safe-area-inset-left));right:calc(3px + env(safe-area-inset-right));
   border:0;border-left:2px solid rgba(255,170,40,.8);border-right:2px solid rgba(255,170,40,.8);border-radius:0;pointer-events:none;z-index:3}
 .bl{position:absolute;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 38% 35%,#fff 0 18%,var(--c) 45%,var(--c2) 100%);box-shadow:0 0 2px 0 var(--c2);
+  background:radial-gradient(circle at 38% 35%,rgba(255,255,255,.85) 0 10%,var(--c) 35%,var(--c2) 100%);box-shadow:0 0 2px 0 var(--c2);
   animation:chase 1.05s infinite}
 .bl.p1{animation-delay:-.35s}.bl.p2{animation-delay:-.7s}
 .bl.q0,.bl.q1{animation:alt .9s infinite}
 .bl.q1{animation-delay:-.45s}
 .fast .bl{animation-duration:.3s}
-@keyframes alt{0%,49.9%{opacity:1}50%,100%{opacity:.2}}
+@keyframes alt{0%,49.9%{opacity:1}50%,100%{opacity:.45}}
 @keyframes chase{0%,33%{opacity:1}33.5%,100%{opacity:.22}}
 header{display:flex;align-items:center;justify-content:space-between}
 .hdr-left,.hdr-right{display:flex;gap:6px;align-items:center}
@@ -692,7 +692,7 @@ function bulbify(el,key,force){
   const frag=document.createDocumentFragment();
   let j=0;pts.forEach(p=>{if(!p){j=0;return}const i=j++;const b=document.createElement('i');
     const pair=key==='frame'?i%2:Math.floor(i/2)%2;b.className='bl '+(key==='frame'?'q'+pair:'p'+(i%3));
-    const cc=key==='frame'?(pair?['#ffd27a','#ff7a00']:['#fff3a0','#ffd000']):[c,c2];b.style.cssText=`width:${size}px;height:${size}px;left:${p[0]-size/2}px;top:${p[1]-size/2}px;--c:${cc[0]};--c2:${cc[1]}`;frag.appendChild(b)});
+    const cc=key==='frame'?(pair?['#ff8c1a','#d94e00']:['#ffe94a','#d9b300']):[c,c2];b.style.cssText=`width:${size}px;height:${size}px;left:${p[0]-size/2}px;top:${p[1]-size/2}px;--c:${cc[0]};--c2:${cc[1]}`;frag.appendChild(b)});
   el.appendChild(frag);
 }
 function buildBulbs(){bulbify($('#frame'),'frame',true);bulbify($('.goal'),'goal');bulbify($('.scorebox'),'score')}
