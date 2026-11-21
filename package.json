@@ -2,7 +2,7 @@
   "name": "kamisado-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Kamisado — jeu de plateau, local et en ligne (2 joueurs), app Android via Capacitor",
+  "description": "Bardou Game — hub de jeux (Kamisado, Abalone, Coup de Maître), app Android via Capacitor",
   "scripts": {
     "sync": "cap sync android"
   },

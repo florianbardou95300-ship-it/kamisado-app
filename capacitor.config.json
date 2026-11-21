@@ -1,6 +1,6 @@
 {
   "appId": "com.badou.samouraigame",
-  "appName": "Samouraï Game",
+  "appName": "Bardou Game",
   "webDir": "www",
   "plugins": {
     "CapacitorUpdater": {

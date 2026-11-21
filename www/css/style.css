@@ -456,3 +456,9 @@ html, body {
   z-index: 50;
 }
 #banner-text { font-size: 18px; font-weight: 700; }
+
+/* ---- Logo Bardou Game ---- */
+.brand-title { margin: 18px 0 4px; text-align: center; line-height: 0; }
+.brand-logo { width: min(78vw, 320px); height: auto; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.55)); }
+.menu-brand { display: block; width: 130px; height: auto; margin: 8px auto -10px; opacity: 0.9; }
+.game-brand { display: block; width: 120px; height: auto; margin-top: 16px; opacity: 0.85; pointer-events: none; }

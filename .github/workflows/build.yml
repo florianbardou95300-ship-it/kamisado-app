@@ -65,7 +65,7 @@ jobs:
         if: github.ref_name == 'main' || github.ref_name == 'master'
         with:
           tag_name: build-${{ github.run_number }}
-          name: Kamisado — build ${{ github.run_number }}
+          name: Bardou Game — build ${{ github.run_number }}
           body: "bundle-sha256:${{ steps.checksum.outputs.sum }}"
           files: |
             android/app/build/outputs/apk/debug/app-debug.apk

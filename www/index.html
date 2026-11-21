@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>Samouraï Game</title>
+<title>Bardou Game</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
 <div id="screen-hub" class="screen active">
   <img class="hub-bg-logo" src="img/oni-mask.png" alt="" />
   <div class="menu-card">
-    <h1 class="title">Samouraï Game</h1>
+    <h1 class="brand-title"><img class="brand-logo" src="img/bardou-logo.webp" alt="Bardou Game" /></h1>
     <p class="subtitle">Choisis ton jeu</p>
     <button class="btn btn-primary btn-game" id="btn-game-kamisado">
       <img class="btn-game-logo" src="img/logo-kamisado.svg" alt="" />
@@ -33,6 +33,7 @@
 <div id="screen-menu" class="screen">
   <div class="menu-card">
     <button class="back-btn" data-back="screen-hub">‹ Retour</button>
+    <img class="menu-brand" src="img/bardou-logo.webp" alt="Bardou Game" />
     <h1 class="title">Kamisado</h1>
     <p class="subtitle">Le jeu des tours de couleur</p>
 
@@ -95,6 +96,7 @@
     </div>
 
     <div id="board" class="board"></div>
+    <img class="game-brand" src="img/bardou-logo.webp" alt="Bardou Game" />
 
     <div id="banner" class="banner hidden">
       <div id="banner-text"></div>
@@ -120,6 +122,7 @@
 <div id="screen-abalone-menu" class="screen">
   <div class="menu-card">
     <button class="back-btn" data-back="screen-hub">‹ Retour</button>
+    <img class="menu-brand" src="img/bardou-logo.webp" alt="Bardou Game" />
     <h1 class="title">Abalone</h1>
     <p class="subtitle">Pousse 6 billes adverses hors du plateau</p>
     <button class="btn btn-primary" id="btn-abalone-local">Jouer en local<br><span class="btn-sub">2 joueurs, même téléphone</span></button>
@@ -209,6 +212,7 @@
     </div>
 
     <svg id="board-abalone" class="board-abalone" viewBox="0 0 100 100"></svg>
+    <img class="game-brand" src="img/bardou-logo.webp" alt="Bardou Game" />
 
     <div id="abalone-banner" class="banner hidden">
       <div id="abalone-banner-text"></div>
