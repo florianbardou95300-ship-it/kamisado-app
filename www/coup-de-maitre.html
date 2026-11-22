@@ -181,6 +181,12 @@ h1 span{color:var(--gold)}
 @keyframes biFade{from{opacity:0;transform:scale(.9)}}
 .bi-go{margin-top:18px;width:100%;font-size:17px;animation:biFade .4s ease-out 1.5s both}
 
+.cat{margin-top:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px}
+.cat summary{font-weight:800;font-size:15px;cursor:pointer}
+.cat-row{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.cat-ic{font-size:22px;width:34px;text-align:center;flex:none}
+.cat-p{font-size:11px;color:var(--gold);font-weight:700}
+.cat-d{font-size:12.5px;color:#d7e3e0;line-height:1.35}
 /* Modales */
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
 #modal[hidden]{display:none}
@@ -946,7 +952,19 @@ function showHelp(){
   <p>Sélectionne jusqu'à 5 cartes et joue une main de poker. Score = <b style="color:#8fbaff">Base</b> × <b style="color:#ff9a9d">Multi</b>. Seules les cartes qui forment la combinaison <b>comptent</b> (entourées de bleu) : elles ajoutent leur valeur à la Base (figures 10, As 11).</p>
   <p>Chaque <b>niveau</b> comporte 3 étapes : Étape 1, Étape 2, puis un <b>boss</b> 👹 avec une règle spéciale qui te complique la vie. Bats le boss du <b>niveau 8</b> pour gagner.</p>
   <p>La <b>boutique</b> propose des <b>Atouts</b> (bonus permanents, 5 max, déclenchés de gauche à droite), des <b>Parchemins</b> (améliorent un type de main) et des <b>Charmes</b> (2 max, à utiliser pendant une étape sur des cartes sélectionnées : améliorations 🔥 💠 🪙 ⛓️, changement d'enseigne, de rang, ou destruction). Le bouton 🔄 change toutes les offres.</p>
-  <p>Argent : récompense de l’étape + 1 $ par main non jouée + 1 $ d'intérêt par tranche de 5 $ (max 5).</p>`);
+  <p>Argent : récompense de l’étape + 1 $ par main non jouée + 1 $ d'intérêt par tranche de 5 $ (max 5).</p>`+catalogHTML());
+}
+function catalogHTML(){
+  const row=(ic,n,d,p)=>`<div class="cat-row"><span class="cat-ic">${ic}</span><div><b>${n}</b>${p?` <span class="cat-p">$${p}</span>`:''}<div class="cat-d">${d}</div></div></div>`;
+  let h=`<details class="cat"><summary>🃏 Atouts (${Object.keys(ATOUTS).length})</summary>`;
+  Object.keys(ATOUTS).forEach(id=>{const d=ATOUTS[id];h+=row(d.i,d.n,descOf(id,null),d.p)});
+  h+=`</details><details class="cat"><summary>📜 Parchemins (${Object.keys(HANDS).length})</summary><p class="small">Chaque Parchemin fait monter d'un niveau un type de main. Gain par niveau :</p>`;
+  Object.keys(HANDS).forEach(k=>{const hd=HANDS[k];h+=row('📜',hd.n,`+${hd.dc} Base et +${hd.dm} Multi (départ : ${hd.c} × ${hd.m})`,3)});
+  h+=`</details><details class="cat"><summary>✨ Charmes (${Object.keys(CHARMES).length})</summary><p class="small">À utiliser pendant une étape, sur des cartes sélectionnées dans ta main. Les changements restent dans ton paquet.</p>`;
+  Object.keys(CHARMES).forEach(id=>{const d=CHARMES[id];const n=id==='teinture'?'Teinture (♠ ♥ ♣ ou ♦)':chName({id,suit:0});const ds=id==='teinture'?"Jusqu'à 3 cartes passent dans l'enseigne de la Teinture":chDesc({id,suit:0});h+=row(d.i,n,ds,d.p)});
+  h+=`</details><details class="cat"><summary>👹 Boss (${BOSSES.length})</summary>`;
+  BOSSES.forEach((b,i)=>{h+=row(`<img src="img/cdm/boss-${b.id}.webp" alt="" style="width:34px;height:34px;object-fit:contain">`,b.n+' · niveau '+(i+1),b.d)});
+  return h+'</details>';
 }
 
 // =============== Init ===============
